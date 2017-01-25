@@ -5,7 +5,7 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 4.0
 Tested up to: 4.7
-Stable tag: 3.47
+Stable tag: 3.49
 
 Tired of buggy and slow Google Maps plugins taking hours to setup? With GMW you'll have a perfect map with a thumbnail and lightbox in minutes!
 
@@ -63,8 +63,9 @@ Check out some examples on the <a href="http://www.gmapswidget.com/">Google Maps
 > > **PRO** version offers more than 50 extra features and options including multiple pins support, pins library, skins, export, import and widget cloning features, Google Analytics integration and premium, USA based support. Install the plugin and try the PRO features 7 days for free! Features are activated instantly. Or read more about it on the <a href="http://www.gmapswidget.com/">official plugin site</a>.
 
 
-**What others say about the plugin**
+**Showcase & What others say about the plugin**
 
+* see a live example of GMW showing off server locations around the world on <a href="http://www.bitcatcha.com/">Bitcatcha</a>
 * voted on the <a href="http://themesplugins.com/Plugin-detail/google-maps-widget-google-map-free-plugin-for-wordpress/" title="Top 100 WordPressian plugin">Top 100 List</a> by WordPressian
 * made it on the <a href="http://tidyrepo.com/google-maps-widget/">Tidy Repo</a> list
 * reviewed 5/5 by <a href="http://websmush.com/google-maps-widget-plugin-review/">Web Smush</a>
@@ -149,6 +150,10 @@ Read the <a href="http://wordpress.org/support/plugin/google-maps-widget">suppor
 6. Thumbnail map - light color scheme
 
 == Changelog ==
+
+= 3.49 =
+* 2017/01/16
+* minor bug fixes
 
 = 3.47 =
 * 2017/01/03

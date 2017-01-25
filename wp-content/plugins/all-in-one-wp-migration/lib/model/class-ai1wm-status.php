@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ class Ai1wm_Status {
 	}
 
 	public static function log( $data = array() ) {
-		if ( ! defined( 'DOING_CRON' ) ) {
+		if ( isset( $_REQUEST['ai1wm_manual_export'] ) || isset( $_REQUEST['ai1wm_manual_import'] ) || isset( $_REQUEST['ai1wm_manual_backups'] ) ) {
 			update_option( AI1WM_STATUS, $data );
 		}
 	}

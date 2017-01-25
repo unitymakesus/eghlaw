@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@
 											<i class="ai1wm-icon-file-zip"></i>
 											<?php echo esc_html( $backup['filename'] ); ?>
 										</td>
-										<?php if ( is_null( $backup['mtime'] ) || is_null( $backup['size'] ) ) :  ?>
+										<?php if ( is_null( $backup['size'] ) ) :  ?>
 											<td class="ai1wm-column-info" colspan="3">
 												<?php _e( 'The file is too large for your hosting plan.', AI1WM_PLUGIN_NAME ); ?>
 											</td>

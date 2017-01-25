@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -469,17 +469,10 @@ function ai1wm_table_prefix( $blog_id = null ) {
  */
 function ai1wm_content_filters( $filters = array() ) {
 	return array_merge( $filters, array(
-			'index.php',
-			'ai1wm-backups',
-			'object-cache.php',
-			'database.sql',
-			'package.json',
-			'multisite.json',
-			'blogs.json',
-			'filemap.list',
-			'themes' . DIRECTORY_SEPARATOR . 'index.php',
-			'plugins' . DIRECTORY_SEPARATOR . 'index.php',
-			'uploads' . DIRECTORY_SEPARATOR . 'index.php',
+		AI1WM_BACKUPS_NAME,
+		AI1WM_PACKAGE_NAME,
+		AI1WM_MULTISITE_NAME,
+		AI1WM_DATABASE_NAME,
 	) );
 }
 
@@ -643,6 +636,7 @@ function ai1wm_active_plugins() {
 /**
  * Set active sitewide plugins (inspired by WordPress activate_plugins() function)
  *
+ * @param  array   $plugins List of plugins
  * @return boolean
  */
 function ai1wm_activate_sitewide_plugins( $plugins ) {
@@ -650,7 +644,7 @@ function ai1wm_activate_sitewide_plugins( $plugins ) {
 
 	// Add plugins
 	foreach ( $plugins as $plugin ) {
-		if ( ! isset( $current[ $plugin ] ) ) {
+		if ( ! isset( $current[ $plugin ] ) && ! is_wp_error( validate_plugin( $plugin ) ) ) {
 			$current[ $plugin ] = time();
 		}
 	}
@@ -661,6 +655,7 @@ function ai1wm_activate_sitewide_plugins( $plugins ) {
 /**
  * Set active plugins (inspired by WordPress activate_plugins() function)
  *
+ * @param  array   $plugins List of plugins
  * @return boolean
  */
 function ai1wm_activate_plugins( $plugins ) {
@@ -668,7 +663,7 @@ function ai1wm_activate_plugins( $plugins ) {
 
 	// Add plugins
 	foreach ( $plugins as $plugin ) {
-		if ( ! in_array( $plugin, $current ) ) {
+		if ( ! in_array( $plugin, $current ) && ! is_wp_error( validate_plugin( $plugin ) ) ) {
 			$current[] = $plugin;
 		}
 	}
@@ -751,7 +746,7 @@ function ai1wm_write( $handle, $content ) {
 		if ( ( $meta = stream_get_meta_data( $handle ) ) ) {
 			throw new Ai1wm_Not_Writable_Exception( sprintf( __( 'Unable to write to: %s', AI1WM_PLUGIN_NAME ), $meta['uri'] ) );
 		}
-	} elseif ( strlen( $content ) !== $write_result  ) {
+	} elseif ( strlen( $content ) !== $write_result ) {
 		throw new Ai1wm_Quota_Exceeded_Exception( __( 'Out of disk space.', AI1WM_PLUGIN_NAME ) );
 	}
 
@@ -811,4 +806,98 @@ function ai1wm_copy( $source_file, $destination_file ) {
 	}
 	ai1wm_close( $source_handle );
 	ai1wm_close( $destination_handle );
+}
+
+/**
+ * Sanitize path
+ *
+ * @param  string  $path           Path string
+ * @param  boolean $leading_slash  Add leading slash
+ * @param  boolean $trailing_slash Add trailing slash
+ * @return string
+ */
+function ai1wm_sanitize_path( $path, $leading_slash = false, $trailing_slash = false ) {
+	// Strip leadning and trailing whitespaces
+	$path = trim( $path );
+
+	// Strip leading backward and forward slashes
+	$path = ltrim( $path, '/\\' );
+
+	// Strip trailing backward and forward slashes
+	$path = rtrim( $path, '/\\' );
+
+	// Add forward leading slash
+	if ( $leading_slash ) {
+		$path = sprintf( '/%s', $path );
+	}
+
+	// Add forward trailing slash
+	if ( $trailing_slash ) {
+		$path = sprintf( '%s/', $path );
+	}
+
+	return preg_replace( '/[\\\\\/]+/', '/', $path );
+}
+
+/**
+ * Get the size of file in bytes
+ *
+ * This method supports files > 2GB on PHP x86
+ *
+ * @param string $file_path Path to the file
+ * @param bool   $as_string Return the filesize as string instead of BigInteger
+ *
+ * @return mixed Math_BigInteger|string|null
+ */
+function ai1wm_filesize( $file_path, $as_string = true ) {
+	$chunk_size = 2000000; // 2MB
+	$file_size  = new Math_BigInteger( 0 );
+
+	try {
+		$file_handle = ai1wm_open( $file_path, 'rb' );
+
+		while ( ! feof( $file_handle ) ) {
+			$bytes     = ai1wm_read( $file_handle, $chunk_size );
+			$file_size = $file_size->add( new Math_BigInteger( strlen( $bytes ) ) );
+		}
+
+		ai1wm_close( $file_handle );
+
+		return $as_string ? $file_size->toString() : $file_size;
+	} catch ( Exception $e ) {
+		return null;
+	}
+}
+
+/**
+ * Return the smaller of two numbers
+ *
+ * @param Math_BigInteger $a First number
+ * @param Math_BigInteger $b Second number
+ *
+ * @return Math_BigInteger
+ */
+function ai1wm_find_smaller_number( Math_BigInteger $a, Math_BigInteger $b ) {
+	if ( $a->compare( $b ) === -1 ) {
+		return $a;
+	}
+
+	return $b;
+}
+
+/**
+ * Wrapper around fseek
+ *
+ * This function works with offsets that are > PHP_INT_MAX
+ *
+ * @param resource        $file_handle Handle to the file
+ * @param Math_BigInteger $offset      Offset of the file
+ */
+function ai1wm_fseek( $file_handle, Math_BigInteger $offset ) {
+	$chunk_size = ai1wm_find_smaller_number( new Math_BigInteger( 2000000 ), $offset );
+	while ( ! feof( $file_handle ) && $offset->toString() != '0' ) {
+		$bytes      = ai1wm_read( $file_handle, $chunk_size->toInteger() );
+		$offset     = $offset->subtract( new Math_BigInteger( strlen( $bytes ) ) );
+		$chunk_size = ai1wm_find_smaller_number( $chunk_size, $offset );
+	}
 }

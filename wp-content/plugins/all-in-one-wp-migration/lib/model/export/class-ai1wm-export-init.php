@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,6 @@ class Ai1wm_Export_Init {
 
 	public static function execute( $params ) {
 
-		// Set progress
-		Ai1wm_Status::info( __( 'Preparing to export...', AI1WM_PLUGIN_NAME ) );
-
 		// Set archive
 		if ( empty( $params['archive'] ) ) {
 			$params['archive'] = ai1wm_archive_file();
@@ -39,9 +36,6 @@ class Ai1wm_Export_Init {
 		if ( empty( $params['storage'] ) ) {
 			$params['storage'] = ai1wm_storage_folder();
 		}
-
-		// Set progress
-		Ai1wm_Status::info( __( 'Done preparing to export.', AI1WM_PLUGIN_NAME ) );
 
 		return $params;
 	}

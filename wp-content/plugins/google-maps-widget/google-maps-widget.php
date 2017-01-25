@@ -4,7 +4,7 @@ Plugin Name: Google Maps Widget
 Plugin URI: http://www.gmapswidget.com/
 Description: Display a single image super-fast loading Google map in a widget. A larger, full featured map is available in a lightbox. Includes a user-friendly interface and numerous appearance options.
 Author: Web Factory Ltd
-Version: 3.47
+Version: 3.49
 Author URI: http://www.webfactoryltd.com/
 Text Domain: google-maps-widget
 Domain Path: lang
@@ -529,17 +529,24 @@ class GMW {
   
   // display message to get pro features for GMW
   static function notice_upgrade() {
-    $promo_delta = 2 * HOUR_IN_SECONDS;
+    $promo_delta = 2 * HOUR_IN_SECONDS - 5;
     $options = GMW::get_options();
     $activate_url = admin_url('options-general.php?page=gmw_options&gmw_open_promo_dialog');
     $dismiss_url = add_query_arg(array('action' => 'gmw_dismiss_notice', 'notice' => 'upgrade', 'redirect' => urlencode($_SERVER['REQUEST_URI'])), admin_url('admin.php'));
 
     echo '<div id="gmw_activate_notice" class="updated notice"><p>' . __('<b>Google Maps Widget <span style="color: #d54e21;">PRO</span></b> has more than 50 extra features &amp; options. Our support is super fast &amp; friendly and with the unlimited license you can install GMW on as many sites as you need.</p>', 'google-maps-widget');
-
+    
     if (current_time('timestamp') - $options['first_install'] < $promo_delta) {
-      $time = date(get_option('time_format'), $options['first_install'] + $promo_delta);
-      echo '<p>We\'ve prepared a special <b>25% welcoming discount</b> for you available <b>only until ' . $time . '</b>.</p>';
-      echo '<p><a href="' . esc_url($activate_url) . '" style="vertical-align: baseline; margin-top: 15px;" class="button-primary">Get PRO now with 25% discount - limited offer until ' . $time . '!</a>';
+      $delta = $options['first_install_gmt'] + $promo_delta - time();
+      $h = $delta / 3600 % 24;
+      if ($h) {
+        $h += 'h';
+      } else {
+        $h = '';
+      }
+      $min = $delta / 60 % 60;
+      echo '<p>We\'ve prepared a special <b>25% welcoming discount</b> available only for another <b class="gmw-countdown" data-endtime="' . ($options['first_install_gmt'] + $promo_delta) . '" style="font-weight: bold;">' . $h . ' ' . $min . 'min</b>.</p>';
+      echo '<p><a href="' . esc_url($activate_url) . '" style="vertical-align: baseline; margin-top: 15px;" class="button-primary">Get PRO now with 25% discount - limited offer!</a>';
     } else {
       echo '<p><a href="' . esc_url($activate_url) . '" style="vertical-align: baseline; margin-top: 15px;" class="button-primary">' . __('See what PRO has to offer', 'google-maps-widget') . '</a>';
     }
@@ -745,7 +752,7 @@ class GMW {
   static function admin_dialogs_markup() {
     $out = '';
     $options = GMW::get_options();
-    $promo_delta = 3 * HOUR_IN_SECONDS;
+    $promo_delta = 2 * HOUR_IN_SECONDS - 5;
     $promo_active = (bool) ((current_time('timestamp') - $options['first_install']) < $promo_delta);
     
     if (GMW::is_plugin_admin_page('widgets') || GMW::is_plugin_admin_page('settings')) {
@@ -762,8 +769,10 @@ class GMW {
                <div class="content">
                   <div class="header"><p><a href="#" class="gmw_goto_pro">Learn more</a> about <span class="gmw-pro">PRO</span> features or <a href="#" class="gmw_goto_activation">enter your license key</a></p>';
       if ($promo_active) {
-        $time = date(get_option('time_format'), $options['first_install'] + $promo_delta);
-        $out .= '<div class="gmw-discount">We\'ve prepared a special <b>25% welcoming discount</b> for you available <b>only until ' . $time . '</b>. Discounts have been applied on the unlimited licenses below.</div>';
+        $delta = $options['first_install_gmt'] + $promo_delta - time();
+        $h = $delta / 3600 % 24;
+        $min = $delta / 60 % 60;
+        $out .= '<div class="gmw-discount">We\'ve prepared a special <b>25% welcoming discount</b> available only for another <b class="gmw-countdown" data-endtime="' . ($options['first_install_gmt'] + $promo_delta) . '">' . $h . 'h ' . $min . 'min 0sec</b>. Discounts have been applied on the unlimited licenses below.</div>';
       }
       $out .= '</div>'; // header
 
@@ -794,8 +803,8 @@ class GMW {
                <div class="gmw-promo-button"><a href="http://www.gmapswidget.com/buy/?p=yearly&r=GMW+v' . GMW::$version . '" data-noprevent="1" target="_blank">$15 /year</a></div>
                </div>';
       $out .= '<div class="gmw-promo-box gmw-promo-box-trial gmw_goto_trial">
-               <div class="gmw-promo-icon"><img src="' . GMW_PLUGIN_URL . 'images/icon-trial.png" alt="14 Days Free Trial License" title="14 Days Free Trial License"></div>
-               <div class="gmw-promo-description"><h3>14 Days Free Trial</h3><br>
+               <div class="gmw-promo-icon"><img src="' . GMW_PLUGIN_URL . 'images/icon-trial.png" alt="7 Days Free Trial License" title="7 Days Free Trial License"></div>
+               <div class="gmw-promo-description"><h3>7 Days Free Trial</h3><br>
                <span>Still on the fence? Test PRO for free NOW</span></div>
                <div class="gmw-promo-button"><a href="#">Start</a></div>
                </div>';
@@ -896,7 +905,7 @@ class GMW {
                  <span style="display: none;" class="error email">Please double check your email address.</span>
                </p>';
       $out .= '<p class="center">
-                 <a id="gmw_start_trial" href="#" class="button button-primary">Start my 14 days free trial</a>
+                 <a id="gmw_start_trial" href="#" class="button button-primary">Start my 7 days free trial</a>
                  <p class="center">Or <a href="#" class="gmw_goto_intro">go PRO now</a></p>
                </p>';
       $out .= '</div>'; // before_trial
@@ -917,7 +926,6 @@ class GMW {
       
       $out .= '<div class="footer">
                     <ul class="gmw-faq-ul">
-                      <li>Check your email for a special <b>25% discount coupon</b></li>
                       <li>We\'ll never share your email address</li>
                       <li>We hate spam too, so we never send it</li>
                     </ul>
@@ -1302,10 +1310,10 @@ class GMW {
     $options = GMW::get_options();
     
     if (!isset($options['first_version']) || !isset($options['first_install'])) {
-      $update = array();
-      $update['first_version'] = GMW::$version;
-      $update['first_install'] = current_time('timestamp');
-      GMW::set_options($update);
+      $options['first_version'] = GMW::$version;
+      $options['first_install_gmt'] = time();
+      $options['first_install'] = current_time('timestamp');
+      GMW::set_options($options);
     }
     
     // force plugin update for PRO users

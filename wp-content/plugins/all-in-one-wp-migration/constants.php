@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ define( 'AI1WM_DEBUG', false );
 // ==================
 // = Plugin Version =
 // ==================
-define( 'AI1WM_VERSION', '6.39' );
+define( 'AI1WM_VERSION', '6.40' );
 
 // ===============
 // = Plugin Name =
@@ -122,6 +122,11 @@ define( 'AI1WM_ARCHIVE_TOOLS_URL', 'https://servmask.com/archive/tools' );
 // = ServMask Table Prefix =
 // =========================
 define( 'AI1WM_TABLE_PREFIX', 'SERVMASK_PREFIX_' );
+
+// ========================
+// = Archive Backups Name =
+// ========================
+define( 'AI1WM_BACKUPS_NAME', 'ai1wm-backups' );
 
 // =========================
 // = Archive Database Name =

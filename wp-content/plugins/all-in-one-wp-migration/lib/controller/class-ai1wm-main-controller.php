@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,8 +86,17 @@ class Ai1wm_Main_Controller {
 		// Export and import buttons
 		add_action( 'plugins_loaded', array( $this, 'ai1wm_buttons' ), 10 );
 
+		// Add export scripts and styles
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_export_scripts_and_styles' ), 10 );
+
+		// Add import scripts and styles
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_import_scripts_and_styles' ), 10 );
+
+		// Add backups scripts and styles
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_backups_scripts_and_styles' ), 10 );
+
 		// Add updater scripts and styles
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_updater_scripts_and_styles' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_updater_scripts_and_styles' ), 10 );
 
 		return $this;
 	}
@@ -116,7 +125,12 @@ class Ai1wm_Main_Controller {
 		// Add export commands
 		add_filter( 'ai1wm_export', 'Ai1wm_Export_Init::execute', 5 );
 		add_filter( 'ai1wm_export', 'Ai1wm_Export_Compatibility::execute', 5 );
-		add_filter( 'ai1wm_export', 'Ai1wm_Export_Resolve::execute', 5 );
+
+		// Do not resolve URL address
+		if ( ! isset( $_REQUEST['ai1wm_manual_export'] ) ) {
+			add_filter( 'ai1wm_export', 'Ai1wm_Export_Resolve::execute', 5 );
+		}
+
 		add_filter( 'ai1wm_export', 'Ai1wm_Export_Archive::execute', 10 );
 		add_filter( 'ai1wm_export', 'Ai1wm_Export_Config::execute', 50 );
 		add_filter( 'ai1wm_export', 'Ai1wm_Export_Enumerate::execute', 100 );
@@ -128,7 +142,12 @@ class Ai1wm_Main_Controller {
 		// Add import commands
 		add_filter( 'ai1wm_import', 'Ai1wm_Import_Upload::execute', 5 );
 		add_filter( 'ai1wm_import', 'Ai1wm_Import_Compatibility::execute', 10 );
-		add_filter( 'ai1wm_import', 'Ai1wm_Import_Resolve::execute', 10 );
+
+		// Do not resolve URL address
+		if ( ! isset( $_REQUEST['ai1wm_manual_import'] ) && ! isset( $_REQUEST['ai1wm_manual_backups'] ) ) {
+			add_filter( 'ai1wm_import', 'Ai1wm_Import_Resolve::execute', 10 );
+		}
+
 		add_filter( 'ai1wm_import', 'Ai1wm_Import_Validate::execute', 50 );
 		add_filter( 'ai1wm_import', 'Ai1wm_Import_Confirm::execute', 100 );
 		add_filter( 'ai1wm_import', 'Ai1wm_Import_Blogs::execute', 150 );
@@ -304,7 +323,7 @@ class Ai1wm_Main_Controller {
 		);
 
 		// sublevel Export menu
-		$export_page_hook_suffix = add_submenu_page(
+		add_submenu_page(
 			'site-migration-export',
 			__( 'Export', AI1WM_PLUGIN_NAME ),
 			__( 'Export', AI1WM_PLUGIN_NAME ),
@@ -312,13 +331,9 @@ class Ai1wm_Main_Controller {
 			'site-migration-export',
 			'Ai1wm_Export_Controller::index'
 		);
-		add_action(
-			'admin_print_scripts-' . $export_page_hook_suffix,
-			array( $this, 'register_export_scripts_and_styles' )
-		);
 
 		// sublevel Import menu
-		$import_page_hook_suffix = add_submenu_page(
+		add_submenu_page(
 			'site-migration-export',
 			__( 'Import', AI1WM_PLUGIN_NAME ),
 			__( 'Import', AI1WM_PLUGIN_NAME ),
@@ -326,23 +341,15 @@ class Ai1wm_Main_Controller {
 			'site-migration-import',
 			'Ai1wm_Import_Controller::index'
 		);
-		add_action(
-			'admin_print_scripts-' . $import_page_hook_suffix,
-			array( $this, 'register_import_scripts_and_styles' )
-		);
 
 		// sublevel Backups menu
-		$backups_page_hook_suffix = add_submenu_page(
+		add_submenu_page(
 			'site-migration-export',
 			__( 'Backups', AI1WM_PLUGIN_NAME ),
 			__( 'Backups', AI1WM_PLUGIN_NAME ),
 			'import',
 			'site-migration-backups',
 			'Ai1wm_Backups_Controller::index'
-		);
-		add_action(
-			'admin_print_scripts-' . $backups_page_hook_suffix,
-			array( $this, 'register_backups_scripts_and_styles' )
 		);
 	}
 
@@ -351,20 +358,24 @@ class Ai1wm_Main_Controller {
 	 *
 	 * @return void
 	 */
-	public function register_export_scripts_and_styles() {
-		do_action( 'ai1mw-register-export-scripts-and-styles' );
+	public function register_export_scripts_and_styles( $hook ) {
+		if ( 'toplevel_page_site-migration-export' !== $hook ) {
+			return;
+		}
+
+		do_action( 'ai1mw_register_export_scripts_and_styles' );
 
 		// we don't want heartbeat to occur when exporting
 		wp_deregister_script( 'heartbeat' );
 
+		wp_enqueue_style(
+			'ai1wm-css-export',
+			Ai1wm_Template::asset_link( 'css/export.min.css' )
+		);
 		wp_enqueue_script(
 			'ai1wm-js-export',
 			Ai1wm_Template::asset_link( 'javascript/export.min.js' ),
 			array( 'jquery' )
-		);
-		wp_enqueue_style(
-			'ai1wm-css-export',
-			Ai1wm_Template::asset_link( 'css/export.min.css' )
 		);
 		wp_localize_script( 'ai1wm-js-export', 'ai1wm_feedback', array(
 			'ajax' => array(
@@ -392,20 +403,24 @@ class Ai1wm_Main_Controller {
 	 *
 	 * @return void
 	 */
-	public function register_import_scripts_and_styles() {
-		do_action( 'ai1mw-register-import-scripts-and-styles' );
+	public function register_import_scripts_and_styles( $hook ) {
+		if ( 'all-in-one-wp-migration_page_site-migration-import' !== $hook ) {
+			return;
+		}
+
+		do_action( 'ai1mw_register_import_scripts_and_styles' );
 
 		// we don't want heartbeat to occur when importing
 		wp_deregister_script( 'heartbeat' );
 
+		wp_enqueue_style(
+			'ai1wm-css-import',
+			Ai1wm_Template::asset_link( 'css/import.min.css' )
+		);
 		wp_enqueue_script(
 			'ai1wm-js-import',
 			Ai1wm_Template::asset_link( 'javascript/import.min.js' ),
 			array( 'jquery' )
-		);
-		wp_enqueue_style(
-			'ai1wm-css-import',
-			Ai1wm_Template::asset_link( 'css/import.min.css' )
 		);
 		wp_localize_script( 'ai1wm-js-import', 'ai1wm_uploader', array(
 			'chunk_size'  => apply_filters( 'ai1wm_max_chunk_size', AI1WM_MAX_CHUNK_SIZE ),
@@ -468,17 +483,21 @@ class Ai1wm_Main_Controller {
 	 *
 	 * @return void
 	 */
-	public function register_backups_scripts_and_styles() {
-		do_action( 'ai1mw-register-backups-scripts-and-styles' );
+	public function register_backups_scripts_and_styles( $hook ) {
+		if ( 'all-in-one-wp-migration_page_site-migration-backups' !== $hook ) {
+			return;
+		}
 
+		do_action( 'ai1mw_register_backups_scripts_and_styles' );
+
+		wp_enqueue_style(
+			'ai1wm-css-backups',
+			Ai1wm_Template::asset_link( 'css/backups.min.css' )
+		);
 		wp_enqueue_script(
 			'ai1wm-js-backups',
 			Ai1wm_Template::asset_link( 'javascript/backups.min.js' ),
 			array( 'jquery' )
-		);
-		wp_enqueue_style(
-			'ai1wm-css-backups',
-			Ai1wm_Template::asset_link( 'css/backups.min.css' )
 		);
 		wp_localize_script( 'ai1wm-js-backups', 'ai1wm_feedback', array(
 			'ajax' => array(
@@ -516,7 +535,7 @@ class Ai1wm_Main_Controller {
 			return;
 		}
 
-		do_action( 'ai1mw-register-updater-scripts-and-styles' );
+		do_action( 'ai1mw_register_updater_scripts_and_styles' );
 
 		wp_enqueue_style(
 			'ai1wm-css-updater',

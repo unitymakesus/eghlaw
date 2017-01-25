@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ class Ai1wm_Export_Enumerate {
 			// Exclude inactive plugins
 			if ( isset( $params['options']['no_inactive_plugins'] ) ) {
 				foreach ( get_plugins() as $plugin => $info ) {
-					if ( is_plugin_inactive( $basename ) ) {
+					if ( is_plugin_inactive( $plugin ) ) {
 						$inactive_plugins[] = 'plugins' . DIRECTORY_SEPARATOR .
 							( ( dirname( $plugin ) === '.' ) ? basename( $plugin ) : dirname( $plugin ) );
 					}

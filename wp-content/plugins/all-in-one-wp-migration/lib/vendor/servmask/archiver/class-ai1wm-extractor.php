@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,16 +33,6 @@ class Ai1wm_Extractor extends Ai1wm_Archiver {
 	public function __construct( $file ) {
 		// call parent, to initialize variables
 		parent::__construct( $file );
-	}
-
-	/**
-	 * Extract files from archive to specified location
-	 *
-	 * @param string $location Location where the files should be extracted
-	 * @param int    $seek     Location in the file to start exporting data from
-	 */
-	public function extract_files( $location, $seek = 0 ) {
-
 	}
 
 	/**
@@ -337,7 +327,7 @@ class Ai1wm_Extractor extends Ai1wm_Archiver {
 		// all files should chmoded to 644
 		$this->set_file_mode( $file, $this->get_permissions_for_file() );
 
-		return $offset;
+		return 0;
 	}
 
 	private function set_mtime_of_file( $file, $mtime ) {

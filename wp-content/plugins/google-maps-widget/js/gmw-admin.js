@@ -566,7 +566,54 @@ jQuery(function($) {
     
     return false;
   }); // test api key
+  
+  
 }); // onload
+
+if (!Date.now) {
+    Date.now = function() { return new Date().getTime(); }
+}
+
+function gmw_update_timer() {
+  out = '';
+  timer = jQuery('.gmw-countdown');
+  
+  if (timer.length == 0) {
+    clearInterval(gmw_countdown_interval);
+  }
+  
+  now = Math.round(new Date().getTime()/1000);
+  timer_end = jQuery(timer).data('endtime');
+  delta = timer_end - now;
+  seconds = Math.floor( (delta) % 60 );
+  minutes = Math.floor( (delta/60) % 60 );
+  hours = Math.floor( (delta/(60*60)) % 24 );
+  
+  if (delta <= 0) {
+    clearInterval(gmw_countdown_interval);
+  }
+  
+  if (hours) {
+    out += hours + 'h ';
+  }
+  if (minutes || out) {
+    out += minutes + 'min ';
+  }
+  if (seconds || out) {
+    out += seconds + 'sec';
+  }
+  if (delta <= 0 || !out) {
+    out = 'discount is no longer available';
+  }
+  
+  jQuery(timer).html(out);
+  
+  return true;
+} // gmw_update_timer
+
+if (jQuery('.gmw-countdown').length) {
+  gmw_countdown_interval = setInterval(gmw_update_timer, 1000);
+}
 
 
 /*!

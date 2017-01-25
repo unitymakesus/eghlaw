@@ -1,21 +1,21 @@
 <div class="ai1wm-feedback">
 	<ul class="ai1wm-feedback-types">
 		<li>
-			<input type="radio" class="ai1wm-flat-radio-button ai1wm-feedback-type" id="ai1wm-feedback-type-1" name="ai1wm-feedback-type" value="review" />
+			<input type="radio" class="ai1wm-flat-radio-button ai1wm-feedback-type" id="ai1wm-feedback-type-1" name="ai1wm_feedback_type" value="review" />
 			<a id="ai1wm-feedback-type-link-1" href="https://wordpress.org/support/view/plugin-reviews/all-in-one-wp-migration?rate=5#postform" target="_blank">
 				<i></i>
 				<span><?php _e( 'I would like to review this plugin', AI1WM_PLUGIN_NAME ); ?></span>
 			</a>
 		</li>
 		<li>
-			<input type="radio" class="ai1wm-flat-radio-button ai1wm-feedback-type" id="ai1wm-feedback-type-2" name="ai1wm-feedback-type" value="suggestions" />
+			<input type="radio" class="ai1wm-flat-radio-button ai1wm-feedback-type" id="ai1wm-feedback-type-2" name="ai1wm_feedback_type" value="suggestions" />
 			<label for="ai1wm-feedback-type-2">
 				<i></i>
 				<span><?php _e( 'I have ideas to improve this plugin', AI1WM_PLUGIN_NAME ); ?></span>
 			</label>
 		</li>
 		<li>
-			<input type="radio" class="ai1wm-flat-radio-button ai1wm-feedback-type" id="ai1wm-feedback-type-3" name="ai1wm-feedback-type" value="help-needed" />
+			<input type="radio" class="ai1wm-flat-radio-button ai1wm-feedback-type" id="ai1wm-feedback-type-3" name="ai1wm_feedback_type" value="help-needed" />
 			<label for="ai1wm-feedback-type-3">
 				<i></i>
 				<span><?php _e( 'I need help with this plugin', AI1WM_PLUGIN_NAME ); ?></span>

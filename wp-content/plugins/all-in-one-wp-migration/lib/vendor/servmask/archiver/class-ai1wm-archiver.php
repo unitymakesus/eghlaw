@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,12 +43,28 @@ abstract class Ai1wm_Archiver {
 		'a4096' // path
 	);
 
+	public function get_block_format() {
+		return $this->block_format;
+	}
+
+	public function set_block_format( $block_format ) {
+		$this->block_format = $block_format;
+	}
+
 	/**
 	 * Filename including path to the file
 	 *
 	 * @type string
 	 */
 	protected $filename = null;
+
+	public function get_filename() {
+		return $this->filename;
+	}
+
+	public function set_filename( $filename ) {
+		$this->filename = $filename;
+	}
 
 	/**
 	 * Handle to the file
@@ -57,6 +73,14 @@ abstract class Ai1wm_Archiver {
 	 */
 	protected $file_handle = null;
 
+	public function get_file_handle() {
+		return $this->file_handle;
+	}
+
+	public function set_file_handle( $file_handle ) {
+		$this->file_handle = $file_handle;
+	}
+
 	/**
 	 * Current file size
 	 *
@@ -64,12 +88,28 @@ abstract class Ai1wm_Archiver {
 	 */
 	protected $current_filesize = null;
 
+	public function get_current_filesize() {
+		return $this->current_filesize;
+	}
+
+	public function set_current_filesize( $current_filesize ) {
+		$this->current_filesize = $current_filesize;
+	}
+
 	/**
 	 * End Of File block string
 	 *
 	 * @type string
 	 */
 	protected $eof = null;
+
+	public function get_eof() {
+		return $this->eof;
+	}
+
+	public function set_eof( $eof ) {
+		$this->eof = $eof;
+	}
 
 	/**
 	 * Default constructor
@@ -194,15 +234,6 @@ abstract class Ai1wm_Archiver {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Get current file size
-	 *
-	 * return int
-	 */
-	public function get_current_filesize() {
-		return $this->current_filesize;
 	}
 
 	/**
