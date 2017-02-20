@@ -228,7 +228,7 @@ function egh_below_content_posts() {
       	'posts_per_page'	=> 2,
         'date_query'      => array(
            array(
-             'after'      => '2 years ago'
+             'after'      => '6 months ago'
            )
         )
   		));

@@ -39,6 +39,16 @@ define( 'CHILD_THEME_NAME', 'EGH Genesis' );
 define( 'CHILD_THEME_URL', 'http://www.unitymakes.us/' );
 define( 'CHILD_THEME_VERSION', '1.0' );
 
+add_filter('wp_mail_from', 'new_mail_from');
+function new_mail_from($old) {
+  return 'contact@eghlaw.com';
+}
+
+add_filter('wp_mail_from_name', 'new_mail_from_name');
+function new_mail_from_name($old) {
+  return 'EGHLaw.com';
+}
+
 //* Enqueue Scripts and Styles
 add_filter( 'wp_enqueue_scripts', 'egh_enqueue_first', 0 );
 function egh_enqueue_first() {
