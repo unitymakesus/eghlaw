@@ -665,7 +665,7 @@ body.single-practice-area .content ul li {
   color: #555655;
 }
 #recent-news .entry {
-  margin-bottom: 0;
+  margin-bottom: 1em;
 }
 #recent-news a.more-link {
   display: none;
