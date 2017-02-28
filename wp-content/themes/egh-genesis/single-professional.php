@@ -195,8 +195,12 @@ function egh_pro_legal_services() {
       echo '<div class="one-third">';
 
       if( $pro_affiliations ):
-        $pro_affiliations = preg_replace("/(.*)/i", "<li>$1</li>", $pro_affiliations);
-        $pro_affiliations = str_replace("<li></li>", "", $pro_affiliations);
+        $pro_affiliations = preg_replace("/^--(.*)/m", "<li>$1</li>", $pro_affiliations);  // Make 3rd level bullets
+        $pro_affiliations = preg_replace("/(<li>.*?<\/li>(?!\n<li>))/s", "<ul>$1</ul>", $pro_affiliations); // Wrap 3rd level bullets
+        $pro_affiliations = preg_replace("/^-(.*)/m", "<li>$1</li>", $pro_affiliations);  // Make 2nd level bullets
+        $pro_affiliations = preg_replace("/(<\/li>).?(<ul>.*?<\/ul>)/s", "\n$2</li>", $pro_affiliations);  // Nest 3rd level within 2nd level
+        $pro_affiliations = preg_replace("/(<li>.*?<\/li>(?!\n<li>)(?!<\/ul>))/s", "<ul>$1</ul>", $pro_affiliations);  // Wrap 2nd level bullets
+        $pro_affiliations = preg_replace("/(.+?)(?:$|\n)(?!<li>|<ul>)/s", "<li>$1</li>", $pro_affiliations);  // Make 1st level bullets
 
         echo '<h3>Professional Affiliations</h3>';
         echo '<ul>' . $pro_affiliations . '</ul>';

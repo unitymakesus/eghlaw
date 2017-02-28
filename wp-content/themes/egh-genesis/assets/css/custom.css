@@ -369,6 +369,7 @@ div:focus {
   bottom: 20px;
   display: block;
   width: 100%;
+  max-width: 1280px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -380,6 +381,12 @@ div:focus {
 @media only screen and (max-width: 1200px) {
   .egh-header .entry-header {
     max-width: 960px;
+  }
+}
+@media only screen and (max-width: 1023px) {
+  .egh-header .entry-header {
+    max-width: 800px;
+    padding: 0 5%;
   }
 }
 .egh-header .entry-header h1 {
@@ -1085,7 +1092,7 @@ body.single-professional .egh-header:before {
   }
 }
 @media only screen and (max-width: 767px) {
-  .egh-header .entry-header, body.single-practice-area .content {
+  body.single-practice-area .content {
     padding: 0 20px;
   }
   .practice-professionals .attorney-list {
