@@ -156,22 +156,12 @@ jQuery( function( $ ){
 			config = field.data('config');
 		config.id = field.prop('id');
 		if( !field.prop( 'multiple' ) ){
-			cf_uploader_filelist = {};
+			if ('object' != typeof  cf_uploader_filelist) {
+				cf_uploader_filelist = {};
+			}
 			field.parent().find('.cf-uploader-trigger').hide();
 		}
-		console.log( field );
 		handleFileSelect( e, config );
-	});
-
-	window.Parsley
-	.addValidator('fileType', {
-	requirementType: 'string',
-	validateString: function( value, requirement ) {
-	  if( value === 'valid' ){
-	  	return true;
-	  }
-	  return false;
-	}
 	});
 
 })

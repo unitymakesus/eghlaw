@@ -35,29 +35,46 @@
 	</div>
 
 	<div class="caldera-config-group">
-		<label for="cf-form-description">
-			<?php esc_html_e( 'Form Description', 'caldera-forms' ); ?>
-		</label>
-		<div class="caldera-config-field">
-			<textarea id="cf-form-description" name="config[description]" class="field-config" style="width:500px;" rows="5">
-				<?php echo htmlentities( $element[ 'description' ] ); ?>
-			</textarea>
-		</div>
-	</div>
-
-	<div class="caldera-config-group">
 		<fieldset>
-				<legend>
-					<?php esc_html_e( 'State', 'caldera-forms' ); ?>
-				</legend>
-				<div class="caldera-config-field">
-					<label for="cf-forms-state">
-						<input type="checkbox" id="cf-forms-state" class="field-config" name="config[form_draft]" value="1" <?php if ( ! empty( $element[ 'form_draft' ] ) ){ ?>checked="checked"<?php } ?>>
-						<?php esc_html_e( 'Deactivate / Draft', 'caldera-forms' ); ?>
-					</label>
-				</div>
+			<legend>
+				<?php esc_html_e( 'Scroll To Top On Submit', 'caldera-forms' ); ?>
+			</legend>
+			<div class="caldera-config-field">
+				<label for="scroll_top-enable">
+					<input id="scroll_top-enable" type="radio" class="field-config" name="config[scroll_top]" value="1" <?php if ( ! empty( $element[ 'scroll_top' ] ) ){ ?>checked="checked"<?php } ?> aria-describedby="scroll_top-disable-description">
+					<?php esc_html_e( 'Enable', 'caldera-forms' ); ?>
+					<p class="description" id="scroll_top-disable-description">
+						<?php esc_html_e( 'When form is submitted, scroll page to form message.', 'caldera-forms' ); ?>
+					</p>
+				</label>
+				<label for="scroll_top-disable">
+					<input id="scroll_top-disable" type="radio" class="field-config" name="config[scroll_top]" value="0" <?php if ( empty( $element[ 'scroll_top' ] ) ){ ?>checked="checked"<?php } ?> aria-describedby="scroll_top-enable-description">
+					<?php esc_html_e( 'Disable', 'caldera-forms' ); ?>
+					<p class="description" id="scroll_top-enable-description">
+						<?php esc_html_e( 'When form is submitted, do not scroll page.', 'caldera-forms' ); ?>
+					</p>
+				</label>
+			</div>
 		</fieldset>
 	</div>
+
+	<div class="caldera-config-group" style="width:500px;">
+		<label for="cf-success-message">
+			<?php esc_html_e( 'Success Message', 'caldera-forms' ); ?>
+		</label>
+		<div class="caldera-config-field">
+			<textarea id="cf-success-message" class="field-config block-input magic-tag-enabled required" name="config[success]" required="required" aria-describedby="cf-success-message-description"><?php if ( ! empty( $element[ 'success' ] ) ) {
+					esc_html_e( $element[ 'success' ] );
+				} else {
+					esc_html_e( 'Form has been successfully submitted. Thank you.', 'caldera-forms' );
+				} ?>
+			</textarea>
+		</div>
+		<p class="description" id="cf-success-message-description">
+			<?php esc_html_e( 'Message to show after form is submitted.', 'caldera-forms' ); ?>
+		</p>
+	</div>
+
 
 	<div class="caldera-config-group">
 		<fieldset>
@@ -71,16 +88,64 @@
 				</label>
 				<label for="db_support-disable">
 					<input id="db_support-disable" type="radio" class="field-config" name="config[db_support]" value="0" <?php if ( empty( $element[ 'db_support' ] ) ){ ?>checked="checked"<?php } ?>>
-						<?php esc_html_e( 'Disabled', 'caldera-forms' ); ?>
+					<?php esc_html_e( 'Disable', 'caldera-forms' ); ?>
 				</label>
 			</div>
 		</fieldset>
 	</div>
 
+    <div class="caldera-config-group">
+        <label id="caldera-forms-label-delete-all-entries" for="caldera-forms-delete-entries-field">
+            <?php esc_html_e( 'Delete Saved Entries', 'caldera-forms' ); ?>
+        </label>
+        <div
+            id="caldera-forms-delete-entries-field"
+            class="caldera-config-field"
+        >
+            <a
+                href="#"
+                class="button"
+                id="caldera-forms-delete-all-form-entries"
+                aria-describedby="caldera-forms-delete-entries-description"
+                <?php //a used as button because that's the only way the JavaScript will work ?>
+                role="button"
+            >
+                <?php esc_html_e('Delete All Saved Entries', 'caldera-forms'); ?>
+            </a>
+            <div
+                 id="caldera-forms-confirm-delete-all-form-entries"
+                 style="display: none;"
+            >
+                <p>
+                    <?php esc_html_e('Are you sure you want to delete all the entries saved for this form ?', 'caldera-forms'); ?>
+                </p>
+                <button
+                    id="caldera-forms-yes-confirm-delete-all-form-entries"
+                    class="button"
+                >
+                    <?php esc_html_e('Yes', 'caldera-forms'); ?>
+                </button>
+                <button
+                        id="caldera-forms-no-confirm-delete-all-form-entries"
+                        class="button"
+                >
+                    <?php esc_html_e( 'No', 'caldera-forms'); ?>
+                </button>
+                <span id="caldera-forms-delete-entries-spinner" class="spinner"></span>
+            </div>
+            <p
+                class="description"
+                id="caldera-forms-delete-entries-description"
+            >
+                <?php esc_html_e( 'Delete all the entries saved for this form. This can NOT be undone.', 'caldera-forms' ); ?>
+            </p>
+        </div>
+    </div>
+
 	<div class="caldera-config-group">
 		<fieldset>
 			<legend>
-				<?php esc_html_e( 'Show Entry View Page?', 'caldera-forms' ); ?>
+				<?php esc_html_e( 'Create sub-menu entry viewer', 'caldera-forms' ); ?>
 			</legend>
 			<div class="caldera-config-field">
 				<label for="pin-toggle-roles-enable">
@@ -89,14 +154,16 @@
 				</label>
 				<label for="pin-toggle-roles-disable">
 					<input id="pin-toggle-roles-disable" type="radio" class="field-config pin-toggle-roles" name="config[pinned]" value="0" <?php if ( empty( $element[ 'pinned' ] ) ){ ?>checked="checked"<?php } ?> aria-describedby="pin-toggle-roles-description">
-					<?php  esc_html_e( 'Disabled', 'caldera-forms' ); ?>
+					<?php  esc_html_e( 'Disable', 'caldera-forms' ); ?>
 				</label>
 			</div>
 			<p class="description" id="pin-toggle-roles-description">
-				<?php esc_html_e( 'Create a sub-menu item of the Caldera Forms menu and a page to show entries for this form?', 'caldera-forms' ); ?>
+				<?php esc_html_e( 'Creates a sub-menu item of the Caldera Forms menu and a page to show entries for this form.', 'caldera-forms' ); ?>
 			</p>
 		</fieldset>
 	</div>
+
+
 
 	<div id="caldera-pin-rules" <?php if ( empty( $element[ 'pinned' ] ) ){ ?>style="display:none;"<?php } ?>>
 		<div class="caldera-config-group">
@@ -115,32 +182,45 @@
 					</label>
 					<hr>
 					<?php
-						global $wp_roles;
-						$all_roles      = $wp_roles->roles;
-						$editable_roles = apply_filters( 'editable_roles', $all_roles );
 
-						foreach ( $editable_roles as $role => $role_details ) {
-							if ( 'administrator' === $role ) {
-								continue;
-							}
-							$id = 'cf-pin-role-' . $role;
-							?>
-							<label for="<?php echo esc_attr( $id ); ?>">
-								<input id="<?php echo esc_attr( $id ); ?>" type="checkbox"
-								       class="field-config form_role_role_check gen_role_check"
-								       data-set="form_role" name="config[pin_roles][access_role][<?php echo $role; ?>]"
-								       value="1" <?php if ( ! empty( $element[ 'pin_roles' ][ 'access_role' ][ $role ] ) ) {
-									echo 'checked="checked"';
-								} ?>>
-								<?php echo esc_html( $role_details[ 'name' ] ); ?>
-							</label>
-							<?php
+					$editable_roles = caldera_forms_get_roles();
+
+					foreach ( $editable_roles as $role => $role_details ) {
+						if ( 'administrator' === $role ) {
+							continue;
 						}
+						$id = 'cf-pin-role-' . $role;
+						?>
+						<label for="<?php echo esc_attr( $id ); ?>">
+							<input id="<?php echo esc_attr( $id ); ?>" type="checkbox"
+							       class="field-config form_role_role_check gen_role_check"
+							       data-set="form_role" name="config[pin_roles][access_role][<?php echo $role; ?>]"
+							       value="1" <?php if ( ! empty( $element[ 'pin_roles' ][ 'access_role' ][ $role ] ) ) {
+								echo 'checked="checked"';
+							} ?>>
+							<?php echo esc_html( $role_details[ 'name' ] ); ?>
+						</label>
+						<?php
+					}
 
 					?>
 				</div>
 			</fieldset>
 		</div>
+	</div>
+
+	<div class="caldera-config-group">
+		<fieldset>
+			<legend>
+				<?php esc_html_e( 'State', 'caldera-forms' ); ?>
+			</legend>
+			<div class="caldera-config-field">
+				<label for="cf-forms-state">
+					<input type="checkbox" id="cf-forms-state" class="field-config" name="config[form_draft]" value="1" <?php if ( ! empty( $element[ 'form_draft' ] ) ){ ?>checked="checked"<?php } ?>>
+					<?php esc_html_e( 'Deactivate / Draft', 'caldera-forms' ); ?>
+				</label>
+			</div>
+		</fieldset>
 	</div>
 
 	<div class="caldera-config-group">
@@ -165,49 +245,43 @@
 			</legend>
 			<div class="caldera-config-field">
 				<label for="cf-honey">
-					<input id="cf-honey" type="checkbox" class="field-config" name="config[check_honey]" value="1" <?php if ( ! empty( $element[ 'check_honey' ] ) ){ ?>checked="checked"<?php } ?>>
-					<?php esc_html_e( 'Enable', 'caldera-forms' ); ?>
-					: <?php esc_html_e( 'Place an invisible field to trick spambots', 'caldera-forms' ); ?>
-				</label>
+					<input
+							id="cf-honey"
+							type="checkbox"
+							class="field-config"
+							name="config[check_honey]"
+							value="1" <?php if (!empty($element['check_honey'])){ ?>checked="checked"<?php } ?>
+							aria-describedby="cf-honey-desc"
+					/>
+				
+					<?php esc_html_e('Enable', 'caldera-forms'); ?>
+					: <?php esc_html_e('Uses an anti-spam honeypot', 'caldera-forms'); ?>
+                </label>
 			</div>
 		</fieldset>
 	</div>
 
-	<div class="caldera-config-group" style="width:500px;">
-		<label for="cf-success-message">
-			<?php esc_html_e( 'Success Message', 'caldera-forms' ); ?>
-		</label>
-		<div class="caldera-config-field">
-			<textarea id="cf-success-message" class="field-config block-input magic-tag-enabled required" name="config[success]"
-			          required="required"><?php if ( ! empty( $element[ 'success' ] ) ) {
-					esc_html_e( $element[ 'success' ] );
-				} else {
-					esc_html_e( 'Form has been successfully submitted. Thank you.', 'caldera-forms' );
-				} ?>
-			</textarea>
-		</div>
-	</div>
 
 	<div class="caldera-config-group">
-		<label for="cf-gravatar-field">
-			<?php esc_html_e( 'Gravatar Field', 'caldera-forms' ); ?>
-		</label>
-		<div class="caldera-config-field">
-			<select id="cf-gravatar-field" aria-describedby="cf-gravatar-field-description" style="width:500px;" class="field-config caldera-field-bind" name="config[avatar_field]"
-			        data-exclude="system" data-default="<?php if ( ! empty( $element[ 'avatar_field' ] ) ) {
-				echo $element[ 'avatar_field' ];
-			} ?>" data-type="email">
-				<?php
-				if ( ! empty( $element[ 'avatar_field' ] ) ) {
-					echo '<option value="' . $element[ 'avatar_field' ] . '"></option>';
-				}
-				?>
-			</select>
-			<p class="description" id="cf-gravatar-field-description">
-				<?php esc_html_e( 'Used when viewing an entry from a non-logged in user.', 'caldera-forms' ); ?>
-			</p>
-		</div>
-	</div>
+        <label for="cf-gravatar-field">
+            <?php esc_html_e( 'Gravatar Field', 'caldera-forms' ); ?>
+        </label>
+        <div class="caldera-config-field">
+            <select id="cf-gravatar-field" aria-describedby="cf-gravatar-field-description" style="width:500px;" class="field-config caldera-field-bind" name="config[avatar_field]"
+                    data-exclude="system" data-default="<?php if ( ! empty( $element[ 'avatar_field' ] ) ) {
+                echo $element[ 'avatar_field' ];
+            } ?>" data-type="email">
+                <?php
+                if ( ! empty( $element[ 'avatar_field' ] ) ) {
+                    echo '<option value="' . $element[ 'avatar_field' ] . '"></option>';
+                }
+                ?>
+            </select>
+            <p class="description" id="cf-gravatar-field-description">
+                <?php esc_html_e( 'Used when viewing an entry from a non-logged in user.', 'caldera-forms' ); ?>
+            </p>
+        </div>
+    </div>
 
 	<?php
 
@@ -221,4 +295,3 @@
 	do_action( 'caldera_forms_general_settings_panel', $element );
 	?>
 </div>
-

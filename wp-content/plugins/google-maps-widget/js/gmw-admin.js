@@ -1,6 +1,6 @@
 /*
- * Google Maps Widget
- * (c) Web factory Ltd, 2012 - 2016
+ * Maps Widget for Google Maps
+ * (c) Web factory Ltd, 2012 - 2019
  */
 
 
@@ -8,14 +8,14 @@ jQuery(function($) {
   if (typeof gmw === 'undefined') {
     return;
   }
-  
-  
+
+
   // init tabs on settings
   $('#gmw-settings-tabs').tabs({ active: gmw_get_active_tab('gmw-settings-tabs'),
                                  activate: function(event, ui) { gmw_save_active_tab(this); }
   });
-  
-  
+
+
   // open promo dialog on settings and address dialog
   $(document).on('click', '.settings_page_gmw_options .open_promo_dialog, .gmw-map-dialog a.open_promo_dialog, .widget .open_promo_dialog', function(e) {
     e.preventDefault();
@@ -24,21 +24,26 @@ jQuery(function($) {
 
     return false;
   }); // open promo dialog
-  
-  
+
+  $('.gmw-promo-button').on('click', function(e) {
+    $('#gmw_promo_dialog').dialog('close');
+
+    return true;
+  })
+
   // init variables
   if (typeof google != 'undefined') {
     gmw.geocoder = new google.maps.Geocoder();
   }
   gmw.map = gmw.marker = false;
-  
-  
+
+
   // init JS for each active widget
   $(".widget-liquid-right [id*='" + gmw.id_base + "-'].widget, .inactive-sidebar [id*='" + gmw.id_base + "'].widget").each(function (i, widget) {
     gmw_init_widget_ui(widget);
   }); // foreach GMW active widget
 
-  
+
   // re-init JS on widget update and add
   $(document).on('widget-updated', function(event, widget) {
     id = $(widget).attr('id');
@@ -53,16 +58,16 @@ jQuery(function($) {
     }
   }); // refresh GUI on widget add/update
 
-  
+
   // init JS UI for an individual GMW
   function gmw_init_widget_ui(widget) {
     $('.gmw-select2', widget).select2({ minimumResultsForSearch: 100, width: '331px' });
-    
+
     // init tabs
     $('.gmw-tabs', widget).tabs({ active: gmw_get_active_tab($('.gmw-tabs', widget).attr('id')),
                  activate: function(event, ui) { gmw_save_active_tab(this); }
     });
-    
+
     // promo options in dropdown
     $('select', widget).on('change', function(event) {
       gmw_promo_option_change(widget, event);
@@ -71,29 +76,31 @@ jQuery(function($) {
     // handle dropdown fields that have dependant fields
     $('.gmw_thumb_pin_type', widget).on('change', function(e) {
       gmw_change_pin_type(widget);
-    }).trigger('change');
+    });
     $('.gmw_thumb_link_type', widget).on('change', function(e) {
       gmw_change_link_type(widget);
-    }).trigger('change');
+    });
+    gmw_change_pin_type(widget);
+    gmw_change_link_type(widget);
 
     // open address picking map dialog
     $('a.gmw-pick-address', widget).on('click', function(e) {
       e.preventDefault();
-      
+
       if (typeof wp !== 'undefined' && wp.customize) {
         alert(gmw.customizer_address_picker);
         return false;
       }
-      
+
       gmw_open_map_dialog($(this).parents('div.widget'), $(this).data('target'));
 
       return false;
     }); // open address picking map dialog
-    
+
     // auto-expand textarea
     $('textarea', widget).on('focus', function(e) {
       e.preventDefault();
-      
+
       $(this).attr('rows', '3');
 
       return false;
@@ -105,11 +112,11 @@ jQuery(function($) {
 
       return false;
     });
-    
+
     // show help when field is focused
     $('input[type="text"], input[type="number"], input[type="url"], select, textarea', widget).on('focus', function(e) {
       gmw_show_pointer(this, widget, true);
-      
+
     }).on('focusout', function(e) {
       gmw_show_pointer(this, widget, false);
     });
@@ -117,32 +124,34 @@ jQuery(function($) {
     $('.gmw-select2', widget).on('select2:close', function(e) { gmw_show_pointer(this, widget, false); });
   } // gmw_init_widget_ui
 
-  
+
   // display help text when element is in focus
   function gmw_show_pointer(element, widget, show) {
-    if (gmw.disable_tooltips == '1') {
-      return;
-    }
-    
     if (show) {
       help_text = $(element).data('tooltip');
-      
+
       // skip fields that don't have any help text
       if (!help_text) {
         return;
       }
-      
+
       help_text = help_text.replace(/(?:\r\n|\r|\n)/g, '<br />');
-      help_text = help_text.replace(/_(.*)_/g, '<i>$1</i>');
-      help_text = help_text.replace(/\*(.*)\*/g, '<b>$1</b>');
+      help_text = help_text.replace(/_([\w\W][^_]*)_/gi, '<i>$1</i>');
+      help_text = help_text.replace(/\*([\w\W][^\*]*)\*/gi, '<b>$1</b>');
 
       title = $(element).data('title') || $(element).prev('label').html() || gmw.plugin_name;
       title = title.replace(':', '');
-    
+
       try {
         $(gmw_pointer).pointer('close');
       } catch(err) {}
-      
+
+      if (help_text.indexOf('</a>') != -1) {
+        show_dismiss = ' show_dismiss';
+      } else {
+        show_dismiss = '';
+      }
+
       gmw_pointer = $(element).pointer({
           content: '<h3>' + title + '</h3><p>' + help_text + '</p>',
           position: {
@@ -150,16 +159,20 @@ jQuery(function($) {
               align: 'left'
           },
           width: 400,
-          pointerClass: 'wp_pointer gmw_pointer'
+          pointerClass: 'wp_pointer gmw_pointer' + show_dismiss
         }).pointer('open');
     } else {
+      // hide pointer
+      if (help_text.indexOf('</a>') != -1) {
+        return;
+      }
       try {
         $(gmw_pointer).pointer('close');
       } catch(err) {}
     }
   } // gmw_show_pointer
 
-  
+
   // get active tab index from cookie
   function gmw_get_active_tab(el_id) {
     id = parseInt(0 + $.cookie(el_id), 10);
@@ -191,7 +204,7 @@ jQuery(function($) {
   function gmw_change_pin_type(widget) {
     type = $('.gmw_thumb_pin_type', widget).val();
     type = type.replace('-', '_');
-    
+
     $('p[class^="gmw_thumb_pin_type_"]', widget).hide();
     $('p.gmw_thumb_pin_type_' + type, widget).show();
   } // pin_type
@@ -202,7 +215,7 @@ jQuery(function($) {
     gmw_open_promo_dialog();
   }
 
-  
+
   // opens promo dialog when special value is selected in widget's options
   function gmw_promo_option_change(widget, event) {
     if (($(event.target).val()) == '-1') {
@@ -215,86 +228,82 @@ jQuery(function($) {
     }
   } // promo_option_change
 
-  
+
   // on hover for pricing table
-  $('#gmw_dialog_intro .gmw-promo-box').hover(
+  $('#gmw-pricing-table td').hover(
     function() {
-      $('#gmw_dialog_intro .gmw-promo-box').removeClass('gmw-promo-box-hover');
-      $(this).addClass('gmw-promo-box-hover');
+      $table = $(this).closest('table');
+      $('td', $table).removeClass('hover');
+      index = $(this).index();
+      $table.find('tr').each(function() {
+        $(this).find('td').eq(index).addClass('hover');
+      });
     }, function() {
-      $('#gmw_dialog_intro .gmw-promo-box').removeClass('gmw-promo-box-hover');
-      $('#gmw_dialog_intro .gmw-promo-box-lifetime').addClass('gmw-promo-box-hover');
+      $table = $(this).closest('table');
+      $('td', $table).removeClass('hover');
+      $table.find('tr').each(function() {
+        $(this).find('td').eq(1).addClass('hover');
+      });
     }
   ); // on hover for pricing table
-  
-  
+
+
   // buy pro click
   $('div.gmw_goto_activation').on('click', function(e) {
     url = $(this).find('a').attr('href');
     win = window.open(url, '_blank');
     win.focus();
-      
+
     $('.gmw_promo_dialog_screen').hide();
     $('#gmw_dialog_activate').show();
-    
+
     return false;
   }); // buy pro click
-  
-  
+
+
   // already have a key button click in dialog
   $('.header a.gmw_goto_activation, .gmw-footer-intro a.gmw_goto_activation, .footer a.gmw_goto_activation').on('click', function(e) {
     e.preventDefault();
-    
+
     $('.gmw_promo_dialog_screen').hide();
     $('#gmw_dialog_activate').show();
-    
+
     return false;
   }); // already have a key click
-  
-  
+
+
   // go to intro button in dialog
   $('.gmw_goto_intro').on('click', function(e) {
     e.preventDefault();
-    
+
     $('.gmw_promo_dialog_screen').hide();
     $('#gmw_dialog_intro').show();
 
     return false;
   }); // go to intro click
-  
-  
+
+
   // go to PRO features button in dialog
   $('.gmw_goto_pro').on('click', function(e) {
     e.preventDefault();
-    
+
     $('.gmw_promo_dialog_screen').hide();
     $('#gmw_dialog_pro_features').show();
 
     return false;
   }); // go to PRO features click
-  
-  
-  // go to trial button in dialog
-  $('.gmw_goto_trial').on('click', function(e) {
-    e.preventDefault();
-    
-    $('.gmw_promo_dialog_screen').hide();
-    $('#gmw_dialog_trial').show();
 
-    return false;
-  }); // go to trial click
-  
-  
-  // enter is pressed in license key field
+
+    // enter is pressed in license key field
   $('#gmw_code').on('keypress', function(e) {
     if (e.which === 13) {
       e.preventDefault();
-      $('#gmw_activate').trigger('click');  
+      $('#gmw_activate').trigger('click');
       return false;
     }
   }); // enter press
-  
-  
+
+
   // check code and activate button in dialog
   $('#gmw_activate').on('click', function(e) {
     e.preventDefault();
@@ -324,79 +333,23 @@ jQuery(function($) {
       $('#gmw_dialog_activate input').removeClass('gmw_spinner').removeClass('gmw_disabled');
       $('#gmw_activate').removeClass('gmw_disabled');
     });
-    
+
     return false;
   }); // activate button click
-  
-  
-  // get trial click
-  $('#gmw_start_trial').on('click', function(e) {
-    e.preventDefault();
 
-    err = false;
-    $('#gmw_dialog_trial input.error').removeClass('error');
-    $('#gmw_dialog_trial span.error').hide();
-    $('#gmw_dialog_trial input').addClass('gmw_disabled').addClass('gmw_spinner');
-    $('#gmw_start_trial').addClass('gmw_disabled');
 
-    if ($('#gmw_name').val().length < 3) {
-      $('#gmw_name').addClass('error');
-      $('#gmw_dialog_trial span.error.name').show();
-      $('#gmw_name').focus().select();
-
-      err = true;
-    } // check name
-
-    re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if (!re.test($('#gmw_email').val())) {
-      $('#gmw_email').addClass('error');
-      $('#gmw_dialog_trial span.error.email').show();
-      $('#gmw_email').focus().select();
-      return false;
-    }
-
-    if (err) {
-      return false;
-    }
-
-    $.post(ajaxurl, { 'action': 'gmw_get_trial',
-                      'name': $('#gmw_name').val(),
-                      'email': $('#gmw_email').val(),
-                      '_ajax_nonce': gmw.nonce_get_trial},
-      function(response) {
-        if (response && response.success == true) {
-          $('.before_trial').hide();
-          $('.after_trial').show();
-        } else if (response && response.success == false && response.data) {
-          alert(response.data);
-        } else {
-          alert(gmw.undocumented_error);
-        }
-      }, 'json')
-    .fail(function() {
-      alert(gmw.undocumented_error);
-    })
-    .always(function() {
-      $('#gmw_dialog_trial input').removeClass('gmw_disabled').removeClass('gmw_spinner');
-      $('#gmw_start_trial').removeClass('gmw_disabled');
-    });
-
-    return false;
-  }); // get trial click
-
-  
   // open promo/activation dialog
   function gmw_open_promo_dialog(target_screen) {
     if (typeof wp !== 'undefined' && wp.customize) {
       alert(gmw.customizer_pro_dialog);
       return false;
     }
-    
+
     // close address picker
     if ($('#gmw_map_dialog').is(':ui-dialog')) {
-      $('#gmw_map_dialog').dialog('close');      
+      $('#gmw_map_dialog').dialog('close');
     }
-    
+
     $('.gmw_promo_dialog_screen').hide();
     $('#gmw_dialog_intro').show();
 
@@ -404,16 +357,16 @@ jQuery(function($) {
         'dialogClass' : 'wp-dialog gmw-dialog',
         'modal' : true,
         'resizable': false,
-        'width': 650,
+        'width': 880,
         'title': gmw.plugin_name,
         'autoOpen': false,
         'closeOnEscape': false,
-        open: function(event, ui) { 
+        open: function(event, ui) {
           $(this).siblings().find('span.ui-dialog-title').html(gmw.dialog_promo_title);
           $('.ui-widget-overlay').bind('click', function () { $(this).siblings('.ui-dialog').find('.ui-dialog-content').dialog('close'); });
           $('.gmw_goto_pro').blur();
         },
-        close: function(event, ui) { 
+        close: function(event, ui) {
           // remove open dialog string from URL
           if (window.location.search.search('gmw_open_promo_dialog') != -1) {
             new_url = window.location.href.replace('gmw_open_promo_dialog', '');
@@ -422,16 +375,16 @@ jQuery(function($) {
           }
         }
     }).dialog('open');
-    
+
     // open specific screen in dialog
     if (target_screen) {
       $('.gmw_promo_dialog_screen').hide();
-      $('#' + target_screen).show();      
+      $('#' + target_screen).show();
     }
   } // open_promo_dialog
-  
-  
-  // recenter dialogs when window resizes  
+
+
+  // recenter dialogs when window resizes
   $(window).resize(function(e) {
     if ($('.ui-dialog #gmw_promo_dialog').is(':visible')) {
       $('#gmw_promo_dialog').dialog('option', 'position', {my: 'center', at: 'center', of: window});
@@ -439,11 +392,11 @@ jQuery(function($) {
     if ($('.ui-dialog #gmw_map_dialog').is(':visible')) {
       $('#gmw_map_dialog').dialog('option', 'position', {my: 'center', at: 'center', of: window});
     }
-    
+
     return true;
   }); // recenter dialogs
 
-  
+
   // open address picking map dialog
   function gmw_open_map_dialog(widget, target) {
     $('#gmw_map_dialog').dialog({
@@ -470,8 +423,8 @@ jQuery(function($) {
         close: function(event, ui) {}
     }).dialog('open');
   } // open_map_dialog
-  
-  
+
+
   function gmw_init_map(address) {
     if (!address) {
       address = 'New York, USA';
@@ -479,7 +432,7 @@ jQuery(function($) {
     gmw_put_pin(address);
   } // gmw_init_map
 
-  
+
   function gmw_put_pin(address) {
     gmw.geocoder.geocode({'address': address}, function(results, status) {
       if (status === google.maps.GeocoderStatus.OK) {
@@ -511,7 +464,7 @@ jQuery(function($) {
     });
   } // gmw_put_pin
 
-  
+
   // get address from coordinates
   function gmw_update_address_by_pos(point) {
     $('#gmw_map_dialog_address').val('Processing coordinates ...');
@@ -526,7 +479,7 @@ jQuery(function($) {
     });
   } // gmw_update_address_by_pos
 
-  
+
   // just close the map dialog
   $('#gmw_close_map_dialog').on('click', function(e) {
     e.preventDefault();
@@ -535,25 +488,25 @@ jQuery(function($) {
 
     return false;
   }); // close dialog
-  
-  
+
+
   // test API key
   $('.gmw-test-api-key').on('click', function(e) {
     e.preventDefault();
     var button = this;
-    
+
     api_key = $('#api_key').val();
     if (api_key.length < 30) {
       alert(gmw.bad_api_key);
       return false;
     }
-    
+
     $(button).addClass('gmw_spinner').addClass('gmw_disabled');
-    
+
     $.get(ajaxurl, {'action': 'gmw_test_api_key', 'api_key': api_key, '_ajax_nonce': gmw.nonce_test_api_key},
           function(response) {
             if (typeof response == 'object') {
-              alert(response.data);  
+              alert(response.data);
             } else {
               alert(gmw.undocumented_error);
             }
@@ -563,11 +516,11 @@ jQuery(function($) {
     }).always(function(response) {
       $(button).removeClass('gmw_spinner').removeClass('gmw_disabled');
     });
-    
+
     return false;
   }); // test api key
-  
-  
+
+
 }); // onload
 
 if (!Date.now) {
@@ -577,22 +530,22 @@ if (!Date.now) {
 function gmw_update_timer() {
   out = '';
   timer = jQuery('.gmw-countdown');
-  
+
   if (timer.length == 0) {
     clearInterval(gmw_countdown_interval);
   }
-  
+
   now = Math.round(new Date().getTime()/1000);
   timer_end = jQuery(timer).data('endtime');
   delta = timer_end - now;
   seconds = Math.floor( (delta) % 60 );
   minutes = Math.floor( (delta/60) % 60 );
   hours = Math.floor( (delta/(60*60)) % 24 );
-  
+
   if (delta <= 0) {
     clearInterval(gmw_countdown_interval);
   }
-  
+
   if (hours) {
     out += hours + 'h ';
   }
@@ -605,9 +558,9 @@ function gmw_update_timer() {
   if (delta <= 0 || !out) {
     out = 'discount is no longer available';
   }
-  
+
   jQuery(timer).html(out);
-  
+
   return true;
 } // gmw_update_timer
 

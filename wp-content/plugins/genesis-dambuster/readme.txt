@@ -1,12 +1,13 @@
 === Genesis Dambuster ===
 Contributors: powerblogservice
-Donate link: http://www.diywebmastery.com/donate/
+Donate link: https://www.diywebmastery.com/donate/
 Tags: genesis plugin, full width templates, beaver builder
 Requires at least: 3.5
-Tested up to: 4.6.1
-Stable tag: 1.5.5
+Tested up to: 5.1.1
+Requires PHP: 5.3.6
+Stable tag: 1.11.0
 License: GPLv3
-License URI: http://www.gnu.org/licenses/gpl-3.0.html
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 A Genesis only WordPress plugin that makes it easy to set up your pages for edge to edge content. Ideal for full width Beaver Builder templates.   
 
@@ -33,11 +34,11 @@ The full width setting allows you to have edge-to-edge backgrounds so you can ma
 
 == Frequently Asked Questions ==
 
-* What does Genesis Dambuster Do?   See http://www.genesisdambuster.com/71/what-does-genesis-dambuster-do/
+* What does Genesis Dambuster Do?   See https://www.genesisdambuster.com/71/what-does-genesis-dambuster-do/
 
-* Do I Have To Use Beaver Builder With Genesis Dambuster? See http://www.genesisdambuster.com/54/do-i-have-to-use-beaver-builder-with-genesis-dambuster/
+* Do I Have To Use Beaver Builder With Genesis Dambuster? See https://www.genesisdambuster.com/54/do-i-have-to-use-beaver-builder-with-genesis-dambuster/
 
-* Any Other Questions?  See http://www.genesisdambuster.com/category/faq/ for the full list of questions and answers about Genesis Dambuster
+* Any Other Questions?  See https://www.genesisdambuster.com/category/faq/ for the full list of questions and answers about Genesis Dambuster
 
 == Screenshots ==
 1. Beaver Builder Page without the plugin (limited width)
@@ -49,19 +50,19 @@ The full width setting allows you to have edge-to-edge backgrounds so you can ma
 
 == Changelog ==
 
-* 1.5.5 - Fixes to Divine and Pretty Chic when using the theme header
-* 1.5.4 - Improvements to handling of Altitude Pro, Agency Pro and Interior Pro
-* 1.5.3 - Reinstate removal of bottom margin - required for Aspire Pro
-* 1.5.2 - Fix bug in saving post settings
-* 1.5.1 - Suppress top margin when a fixed header is removed - affects fixed header themes such as Digital Pro, No Sidebar, Agency pro, etc
-* 1.5 - Added support for Aspire Pro, Digital Pro, Genesis Sample, Interior Pro, No Sidebar Pro, Showcase Pro and Workstation Pro. Fixed bug in AltitudePro
-* 1.4 - Removes Dynamik EZ Feature and Fat Footer Widget Areas
-* For full change history see http://www.genesisdambuster.com/changelog/
+* 1.11.0 - Added Revolution Pro and Smart Passive Income Pro
+* 1.10.2 - Fix bug in home page setting
+* 1.10.1 - Fix bug in clearing flags on page settings
+* 1.10 - Updated for Academy Pro, Breakthrough Pro and Wellness Pro 
+* 1.9 - Updated for latest News Pro and Essence Pro
+* 1.8 - Updated to show Dambuster post meta box in Gutenberg Editor
+* 1.7 - Added option to have dambuster enabled on all pages and posts by default and added support for more themes
+* For full change history see https://www.genesisdambuster.com/changelog/
 
 
 == Upgrade Notice ==
 
-= 1.5.5 - Optional - Fixes to Divine and Pretty Chic when using the theme header
+= 1.11.0 - Optional - Added Revolution Pro and Smart Passive Income Pro
 
 == How to Use The Plugin ==
 
@@ -81,8 +82,8 @@ If you don't want to specify all the settings for every post then you can set up
 
 Here are some other  useful Genesis Dambuster Plugin links:
 
-* Overview and Videos -  http://www.genesisdambuster.com/
-* Plugin Features - http://www.genesisdambuster.com/features/
-* Supported Themes - http://www.genesisdambuster.com/supported-genesis-child-themes
-* Supporting Custom Themes -  http://www.genesisdambuster.com/hooks
+* Overview and Videos -  https://www.genesisdambuster.com/
+* Plugin Features - https://www.genesisdambuster.com/features/
+* Supported Themes - https://www.genesisdambuster.com/supported-genesis-child-themes
+* Supporting Custom Themes -  https://www.genesisdambuster.com/hooks
 

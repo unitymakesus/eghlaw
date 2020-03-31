@@ -1,6 +1,6 @@
 /*
- * Google Maps Widget
- * (c) Web factory Ltd, 2012 - 2016
+ * Maps Widget for Google Maps
+ * (c) Web factory Ltd, 2012 - 2018
  */
 
 

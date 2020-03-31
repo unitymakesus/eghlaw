@@ -209,14 +209,18 @@ function build_processor_types($default = null){
 	if(!empty($element['processors'])){
 		foreach($element['processors'] as $processor_id=>$config){
 			if(!empty($config['type'])){
+
 				$config_str = array();
 				if(!empty($config['config'])){
-					$config_str = json_encode($config['config']);
+					$config_str = json_encode( $config['config'] );
 				}
-				$conditions = '{}';
-				if(!empty($config['conditions'])){
-					$conditions = json_encode($config['conditions']);
+
+				if ( ! empty( $config[ 'conditions' ] ) ) {
+					$conditions = wp_json_encode( $config[ 'conditions' ] );
+				} else {
+					$conditions = '{}';
 				}
+
 				// runtime conditions where introduced in 1.3.2
 				// as was the cf_version in form config. so its safe to say that id this value is set, its the same version or higher
 				if( empty( $element['cf_version'] ) ){
@@ -308,10 +312,14 @@ foreach($form_processors as $processor=>$config){
 			echo '<span class="no-conditions"></span>';
 		}
 	}	
+	
+	//Output config options from template, pre-rendered HTML or an notice of no options.
 	if(isset($config['template'])){
 		include $config['template'];
+	}elseif( isset($config['html'])){
+		echo $config['html'];
 	}else{
-		echo '<p>' . __('This processor has no configurable options.', 'caldera-forms') . '</p>';
+		echo '<p>' . esc_html__('This processor has no configurable options.', 'caldera-forms') . '</p>';
 	}
 	echo "\r\n</script>\r\n";
 

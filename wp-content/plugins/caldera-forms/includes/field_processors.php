@@ -7,6 +7,8 @@ function cf_handle_multi_view( $data, $field ){
 	if( empty( $data ) || !is_array( $data ) ){
 		return $data;
 	}
+	// Remove the json total of checked options
+	array_pop($data);
 	// can put in the value as well.
 	$viewer = array();
 
@@ -30,16 +32,31 @@ function cf_handle_multi_view( $data, $field ){
 add_filter('caldera_forms_process_field_file', 'cf_handle_file_upload', 10, 3);
 add_filter('caldera_forms_process_field_advanced_file', 'cf_handle_file_upload', 10, 3);
 
-
+/**
+ * Handle uploading of files from file fields
+ *
+ * @since unknown
+ *
+ * @param $entry
+ * @param $field
+ * @param $form
+ *
+ * @return bool|mixed
+ */
 function cf_handle_file_upload( $entry, $field, $form ){
+	if( ! Caldera_Forms_Field_Util::is_file_field( $field, $form ) ){
+		return false;
+	}
 
 	// check transdata if string based entry
 	if( is_string( $entry ) ){
-		$transdata = get_transient( $entry );
-		if( !empty( $transdata ) ){
+		$transdata = Caldera_Forms_Transient::get_transient( $entry );
 
+		if( !empty( $transdata ) ){
+			Caldera_Forms_Transient::delete_at_submission_complete( $entry );
 			return $transdata;
 		}
+
 	}
 
 	if( isset($_POST[ '_cf_frm_edt' ] ) ) {
@@ -129,7 +146,7 @@ function cf_handle_file_upload( $entry, $field, $form ){
 			if( is_callable( $uploader) ){
 				$upload = call_user_func( $uploader, $file, $upload_args );
 			}else{
-				return new WP_Error( 'invalid-upload-handler', __( sprintf( 'Invalid file upload handler. See %s', ' https://calderaforms.com/doc/alternative-file-upload-directory/'), 'caldera-forms') );
+				return new WP_Error( 'invalid-upload-handler', sprintf( __( 'Invalid file upload handler. See %s', 'caldera-forms'), 'https://calderaforms.com/doc/alternative-file-upload-directory/') );
 			}
 
 			if( !empty( $upload['error'] ) ){
@@ -138,7 +155,7 @@ function cf_handle_file_upload( $entry, $field, $form ){
 			$uploads[] = $upload['url'];
 			// check media handler
 			if( !empty( $field['config']['media_lib'] ) ){
-                Caldera_Forms_Files::add_to_media_library( $upload );
+                Caldera_Forms_Files::add_to_media_library( $upload, $field );
 			}
 		}
 
@@ -190,3 +207,106 @@ function caldera_forms_allow_edit_hidden_fields( $field ){
 	}
 	return $field;
 };
+
+add_filter( 'caldera_forms_validate_field_phone_better', 'caldera_forms_validate_phone_better', 10, 3 );
+/**
+ * Prevent phone number fields submitted with country code only from being considered valid.
+ *
+ * @uses "caldera_forms_validate_field_phone_better" filter
+ *
+ * @since 1.5.2
+ *
+ * @param string|mixed $entry
+ * @param array $field
+ * @param array $form
+ *
+ * @return WP_Error|string
+ */
+function caldera_forms_validate_phone_better( $entry, $field, $form ){
+	if( empty( $field[ 'required' ] ) ){
+		return $entry;
+	}
+
+	if( false !== strpos( $entry, '+' ) && 4 >= strlen( $entry ) ){
+		return new WP_Error( 400, __( 'Country code is required', 'caldera-forms' ) );
+	}
+
+	return $entry;
+}
+
+add_filter( 'caldera_forms_validate_field_star_rating', 'caldera_forms_validate_field_star_rating', 10, 3 );
+
+/**
+ * Validate star rating fields
+ *
+ * Makes 0 an invalid entry for a required star rating field
+ *
+ * @since 1.5.5
+ *
+ * @uses "caldera_forms_validate_field_star_rating" filter
+ *
+ * @param int|string $entry Entyre value
+ * @param array $field
+ * @param array $form
+ * @return WP_Error|string|int
+ */
+function caldera_forms_validate_field_star_rating( $entry, $field, $form ){
+	if( ! empty( $field[ 'required' ] ) && empty( $entry ) ){
+		return new WP_Error( 400, __( 'Value is required', 'caldera-forms' ) );
+	}
+
+	return $entry;
+
+}
+
+add_filter( 'caldera_forms_validate_field_email', 'caldera_forms_validate_field_email', 10, 3 );
+/**
+ * Reject field value if ! is_email() on email fields
+ *
+ * @uses "caldera_forms_validate_field_email" filter
+ *
+ * @since 1.7.2
+ *
+ * @param string|mixed $entry
+ * @param array $field
+ * @param array $form
+ *
+ * @return WP_Error|string
+ */
+function caldera_forms_validate_field_email( $entry, $field, $form ){
+    if(  empty( $entry ) ){
+        return $entry;
+    }
+
+    if( ! is_email( $entry ) ){
+        return new WP_Error( 400, __( 'Not a valid email address', 'caldera-forms' ) );
+    }
+
+    return $entry;
+}
+
+add_filter( 'caldera_forms_validate_field_number', 'caldera_forms_validate_field_number', 10, 3 );
+/**
+ * Reject field value if ! is_numeric() on number fields
+ *
+ * @uses "caldera_forms_validate_field_number" filter
+ *
+ * @since 1.7.2
+ *
+ * @param string|mixed $entry
+ * @param array $field
+ * @param array $form
+ *
+ * @return WP_Error|string
+ */
+function caldera_forms_validate_field_number( $entry, $field, $form ){
+    if(  empty( $entry ) ){
+        return $entry;
+    }
+
+    if( ! is_numeric( $entry ) ){
+        return new WP_Error( 400, __( 'Not a number', 'caldera-forms' ) );
+    }
+
+    return $entry;
+}

@@ -1,6 +1,6 @@
 /*
- * Google Maps Widget
- * (c) Web factory Ltd, 2012 - 2016
+ * Maps Widget for Google Maps
+ * (c) Web factory Ltd, 2012 - 2019
  */
 
  
@@ -14,7 +14,7 @@ jQuery(document).ready(function($){
       return true;
     }
     $(pointer.target).pointer({
-        content: '<h3>Google Maps Widget</h3><p>' + pointer.content + '</p>',
+        content: '<h3>Maps Widget for Google Maps</h3><p>' + pointer.content + '</p>',
         position: {
             edge: pointer.edge,
             align: pointer.align

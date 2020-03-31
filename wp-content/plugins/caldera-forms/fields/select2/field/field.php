@@ -12,11 +12,10 @@ if( !empty( $field['config']['advanced_populate']['filter'] ) ){
 				}
 			}
 		}
-	}
-
-	
+	}	
 }
 
+$field_value = Caldera_Forms_Field_Util::find_select_field_value( $field, $field_value );
 // default
 if( empty( $field['config']['border'] ) ){
 	$field['config']['border'] = '#b6b6b6';
@@ -47,21 +46,12 @@ if( empty( $field['config']['color'] ) ){
 		<?php if( empty( $bound ) ){ ?>
 		<select <?php echo $field_placeholder; ?> id="<?php echo esc_attr( $field_id ); ?>" <?php echo $multi; ?> data-select-two="true" data-field="<?php echo esc_attr( $field_base_id ); ?>" class="<?php echo esc_attr( $field_class ); ?>" name="<?php echo esc_attr( $field_name ); ?>" <?php echo $field_required; ?> <?php echo $placeholder; ?>>
 		<?php
-			if(isset( $field['config'] ) && isset($field['config']['default']) && isset($field['config']['option'][$field['config']['default']])){
-				//if( $field['config']['option'][$field['config']['default']]['value'] )
-				if( $field['config']['default'] === $field_value ){
-					$field_value = $field['config']['option'][$field['config']['default']]['value'];
-				}
-
-
-			}
-
 
 		if(!empty($field['config']['option'])){
-			if(!empty($field['config']['default'])){
-				if(!isset($field['config']['option'][$field['config']['default']])){
-					echo "<option value=\"\"></option>\r\n";
-				}
+
+			if ( ! empty( $field_value ) ) {
+				echo "<option value=\"\"></option>\r\n";
+
 			}elseif( !empty( $field['config']['placeholder'] ) ){
 				echo '<option value=""></option>';
 			}
@@ -70,9 +60,18 @@ if( empty( $field['config']['color'] ) ){
 				if(!isset($option['value'])){
 					$option['value'] = htmlspecialchars( $option['label'] );
 				}
+				if( ! empty( $option['disabled'] ) ) {
+					$disabled[$option_key] = true;
+				}
 
 				?>
-				<option value="<?php echo $option['value']; ?>" <?php if( in_array( $option['value'] , (array) $field_value ) ){ ?>selected="selected"<?php } ?>><?php echo $option['label']; ?></option>
+				<option
+					data-calc-value="<?php echo esc_attr( Caldera_Forms_Field_Util::get_option_calculation_value( $option, $field, $form ) ); ?>"
+					value="<?php echo esc_attr( $option['value'] ); ?>"
+					<?php if ( isset( $disabled[$option_key] ) && $disabled[$option_key] === true ) { ?>disabled<?php } ?>
+					<?php if( in_array( $option['value'] , (array) $field_value ) ){ ?>selected="selected"<?php } ?>>
+					<?php echo $option['label']; ?>
+				</option>
 				<?php
 			}
 		} ?>
@@ -111,34 +110,36 @@ ob_start();
 }
 </style>
 <script>
-jQuery( function($){
-	<?php if( !empty( $bound ) ){ ?>
-	var opts = {
-		ajax: {
-			url: ajaxurl,
-			dataType: 'json',
-			quietMillis: 250,
-			data: function (term, page) {
-				return {
-					action : 'cf_filter_populate',
-					q: $('<?php echo $bound; ?>').val(), // search term
-					<?php if( !empty( $field['config']['easy_pod'] ) ){?>easy_pod : '<?php echo $field['config']['easy_pod']; ?>'<?php } ?>
-				};
-			},
-			results: function (data, page) {
+window.addEventListener('DOMContentLoaded', function(){
+	jQuery( function($){
+		<?php if( !empty( $bound ) ){ ?>
+		var opts = {
+			ajax: {
+				url: ajaxurl,
+				dataType: 'json',
+				quietMillis: 250,
+				data: function (term, page) {
+					return {
+						action : 'cf_filter_populate',
+						q: $('<?php echo $bound; ?>').val(), // search term
+						<?php if( !empty( $field['config']['easy_pod'] ) ){?>easy_pod : '<?php echo $field['config']['easy_pod']; ?>'<?php } ?>
+					};
+				},
+				results: function (data, page) {
 
-				return { results: data };
-			},
-			cache: true
-		}
-	};
-	<?php }else{ ?>	
-	var opts = {};
-	<?php } ?>
+					return { results: data };
+				},
+				cache: true
+			}
+		};
+		<?php }else{ ?>	
+		var opts = {};
+		<?php } ?>
 
-	$(document).on('cf.add', function(){
-		$('#<?php echo $field_id; ?>').select2( opts );
-	}).trigger('cf.add');
+		$(document).on('cf.bind', '#<?php echo $field_id; ?>', function() {
+			$(this).select2( opts );
+		});
+	});
 });
 </script>
 <?php

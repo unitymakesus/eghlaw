@@ -3,8 +3,8 @@ Contributors: connectthink
 Tags: sass, scss, css
 Plugin URI: https://github.com/ConnectThink/WP-SCSS
 Requires at least: 3.0.1
-Tested up to: 4.7
-Stable tag: 1.2.2
+Tested up to: 5.3
+Stable tag: 1.2.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/copyleft/gpl.html
 
@@ -62,6 +62,20 @@ Make sure your directories are properly defined in the settings. Paths are defin
 If you are having issues with the plugin, create an issue on [github](https://github.com/ConnectThink/WP-SCSS), and we'll do our best to help.
 
 == Changelog ==
+= 1.2.5 =
+* Fix error when ".*" folders exist [@chameron](https://github.com/ConnectThink/WP-SCSS/pull/111)
+* Add detailed error description for the directory settings [@andreyc0d3r](https://github.com/ConnectThink/WP-SCSS/pull/121)
+* Fix on SASS compilation trigger [@fazzinipierluigi](https://github.com/ConnectThink/WP-SCSS/pull/122)
+
+= 1.2.4 =
+* Updated scssphp to version 0.7.5
+* Added source map [@iannacone](https://github.com/ConnectThink/WP-SCSS/issues/49)
+* Always define $wpscss_compiler in the global scope [@jazbek](https://github.com/ConnectThink/WP-SCSS/pull/98)
+
+= 1.2.3 =
+* Updated scssphp to version 0.7.2 [@hellerbenjamin](https://github.com/ConnectThink/WP-SCSS/pull/86)
+* Removed depricated screen_icon()
+
 = 1.2.2 =
 * Updated scssphp to version 0.6.6
 

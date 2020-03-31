@@ -23,3 +23,25 @@
 .breadcrumb > li.error > a {
   color: #ff0000;
 }
+
+.caldera-grid .cf-credit-card{
+  padding-left: 42px;
+  background-image: url( '../images/credit-card.svg' );
+  background-repeat: no-repeat !important;
+  background-position-x: 4px !important;
+  background-position-y: 3px !important;
+
+}
+
+.caldera-grid .screen-reader-text {
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  overflow: hidden;
+  position: absolute !important;
+  width: 1px;
+  word-wrap: normal !important;
+}
+
+p.caldera-forms-consent-field-agreement {
+  display: inline;
+}

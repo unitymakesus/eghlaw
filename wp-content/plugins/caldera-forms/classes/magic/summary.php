@@ -29,6 +29,13 @@ class Caldera_Forms_Magic_Summary extends Caldera_Forms_Magic_Parser {
 	 */
 	protected $pattern = '';
 
+	/**
+	 * Fields ordered
+	 *
+	 * @since 1.5.0.10
+	 *
+	 * @var array
+	 */
 	protected $ordered_fields;
 
 	/**
@@ -62,67 +69,109 @@ class Caldera_Forms_Magic_Summary extends Caldera_Forms_Magic_Parser {
 			$ordered_fields = $this->ordered_fields;
 		}
 
+		/**
+		 * Modify fields used in summary magic tag
+		 *
+		 * @since 1.5.0.10
+		 *
+		 * @param array $ordered_fields Fields in order they will be displayed
+		 * @param array $form Form config
+		 */
+		$this->ordered_fields = $ordered_fields = apply_filters( 'caldera_forms_summary_magic_fields', $ordered_fields, $this->form );
+
 
 		if ( ! empty( $ordered_fields ) ) {
+			$tag_i = -1;
 			foreach ( $ordered_fields as $field_id => $field ) {
-
-				if ( in_array( $field[ 'type' ], array(
-					'button',
-					'recaptcha',
-					'html'
-				) ) ) {
-					continue;
-				}
-
-				if( Caldera_Forms_Field_Util::is_file_field( $field_id, $this->form ) && Caldera_Forms_Files::is_private( Caldera_Forms_Field_Util::get_field( $field_id, $this->form ) ) ){
-					continue;
-				}
-
-				// filter the field to get field data
-				$field = apply_filters( 'caldera_forms_render_get_field', $field, $this->form );
-				$field = apply_filters( 'caldera_forms_render_get_field_type-' . $field[ 'type' ], $field, $this->form );
-				$field = apply_filters( 'caldera_forms_render_get_field_slug-' . $field[ 'slug' ], $field, $this->form );
-
-				if (  null == $this->data ) {
-					$field_values = (array) Caldera_Forms::get_field_data( $field_id, $this->form );
-				}else{
-					if( ! isset( $this->data[ $field_id ] ) ){
+				$tag_i++;
+				$type = Caldera_Forms_Field_Util::get_type( $field, $this->form );
+				$not_support = Caldera_Forms_Fields::not_support( $type, 'entry_list' );
+				if( $not_support ){
+					if( 'html' !== $type || empty( $field[ 'config' ][ 'show_in_summary' ] ) ){
 						continue;
+
 					}
-					$field_values = (array) $this->data[ $field_id ];
 				}
 
-				if ( isset( $field_values[ 'label' ] ) ) {
-					$field_values = $field_values[ 'value' ];
-				} else {
-					foreach ( $field_values as $field_key => $field_value ) {
-						if ( true === is_array( $field_value ) && true === array_key_exists( 'label', $field_value ) && true === array_key_exists( 'value', $field_value ) ) {
-							$field_values[ $field_key ] = $field_value[ 'value' ];
+				if( Caldera_Forms_Field_Util::is_file_field( $field_id, $this->form ) && Caldera_Forms_Files::is_private( $field )  ){
+					continue;
+				}
+
+				$field_value = false;
+				switch( $type ){
+					case 'html' :
+						$field_value = Caldera_Forms::do_magic_tags( Caldera_Forms_Field_Util::get_default( $field_id, $this->form ) );
+						break;
+					case 'file'  :
+						$field_value = Caldera_Forms_Magic_Doer::magic_image( $field,  $this->get_field_value( $field_id ), $this->form );
+						break;
+					case 'calculation' :
+						$field_value = Caldera_Forms_Magic_Doer::calculation_magic( $field, $this->get_field_value( $field_id ) );
+						break;
+					case 'credit_card_number' :
+						$field_value = $this->get_credit_card_hasher()->credit_card_number( $this->get_field_value( $field_id ) );
+						break;
+					case 'credit_card_cvc' :
+						$field_value = $this->get_credit_card_hasher()->credit_card_cvc( $this->get_field_value( $field_id ) );
+						break;
+					default :
+						if (  null == $this->data ) {
+							$field_values = (array) Caldera_Forms::get_field_data( $field_id, $this->form );
+						}else{
+							if( ! isset( $this->data[ $field_id ] ) ){
+								break;
+							}
+							$field_values = (array) $this->get_field_value( $field_id );
 						}
 
-					}
+						if ( isset( $field_values[ 'label' ] ) ) {
+							$field_values = $field_values[ 'value' ];
+						} else {
+							foreach ( $field_values as $field_key => $field_value ) {
+								if ( true === is_array( $field_value ) && true === array_key_exists( 'label', $field_value ) && true === array_key_exists( 'value', $field_value ) ) {
+									$field_values[ $field_key ] = $field_value[ 'value' ];
+								}
+
+							}
+						}
+
+						$should_use_label = false;
+						if ( is_array( $field ) ) {
+							$should_use_label = $this->should_use_label( $field );
+						}
+
+						if( $should_use_label ){
+							foreach ( $field_values as $field_key => $field_value ) {
+								$field_values[ $field_key ] = $this->option_value_to_label( $field_value, $field );
+							}
+						}
+
+
+						$field_value = implode( ', ', (array) $field_values );
+						break;
+
 				}
 
-				$should_use_label = false;
-				if ( is_array( $field ) ) {
-					$should_use_label = $this->should_use_label( $field );
-				}
 
-				if( $should_use_label ){
-					foreach ( $field_values as $field_key => $field_value ) {
-						$field_values[ $field_key ] = $this->option_value_to_label( $field_value, $field );
-					}
-				}
+				if ( $field_value !== null && ! is_array( $field_value ) && strlen( (string) $field_value ) > 0 ) {
 
+					/**
+					 * Change value displayed for field inside Caldera Forms summary magic tag
+					 *
+					 * @since 1.5.0.10
+					 *
+					 * @param string $field_value The value
+					 * @param array $field Field config
+					 * @param array $form Form config
+					 */
+					$field_value = apply_filters( 'caldera_forms_magic_summary_field_value', $field_value, $field, $this->form );
 
-				$field_value = implode( ', ', (array) $field_values );
-
-				if ( $field_value !== null && strlen( $field_value ) > 0 ) {
 					if ( $this->html ) {
-						$out[] = sprintf( $this->pattern, $field[ 'label' ], $field_value );
+						$out[ $tag_i ] = sprintf( $this->pattern, $field[ 'label' ], $field_value );
 					} else {
-						$out[] = $field[ 'label' ] . ': ' . $field_value;
+						$out[ $tag_i ] = $field[ 'label' ] . ': ' . $field_value;
 					}
+
 				}
 			}
 		}

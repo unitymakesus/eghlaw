@@ -1,11 +1,14 @@
 <div class="caldera-config-group">
-	<label><?php _e('Placeholder', 'caldera-forms'); ?></label>
+	<label for="{{_id}}_placeholder">
+		<?php esc_html_e('Placeholder', 'caldera-forms'); ?></label>
 	<div class="caldera-config-field">
 		<input type="text" id="{{_id}}_placeholder" class="block-input field-config" name="{{_name}}[placeholder]" value="{{placeholder}}">
 	</div>
 </div>
 <div class="caldera-config-group">
-	<label><?php _e('Default'); ?></label>
+	<label for="{{_id}}_default">
+		<?php esc_html_e('Default', 'caldera-forms'); ?>
+	</label>
 	<div class="caldera-config-field">
 		<input type="text" id="{{_id}}_default" class="block-input field-config magic-tag-enabled" name="{{_name}}[default]" value="{{default}}">
 	</div>
@@ -13,14 +16,12 @@
 
 <div class="caldera-config-group">
 	<label for="{{_id}}-type_override">
-		<?php _e('HTML5 Type', 'caldera-forms'); ?>
+		<?php esc_html_e( 'HTML5 Type', 'caldera-forms'); ?>
 	</label>
 	<div class="caldera-config-field">
 		<select class="field-config {{_id}}_type_override" name="{{_name}}[type_override]" id="{{_id}}-type_override" aria-describedby="{{_id}}-type_override-description">
 			<option {{#is type_override value="text"}}selected="selected"{{/is}}value="text">text</option>
 			<option {{#is type_override value="date"}}selected="selected"{{/is}}value="date">date</option>
-			<option {{#is type_override value="datetime"}}selected="selected"{{/is}}value="datetime">datetime</option>
-			<option {{#is type_override value="datetime-local"}}selected="selected"{{/is}}value="datetime-local">datetime-local</option>
 			<option {{#is type_override value="month"}}selected="selected"{{/is}}value="month">month</option>
 			<option {{#is type_override value="number"}}selected="selected"{{/is}}value="number">number</option>
 			<option {{#is type_override value="search"}}selected="selected"{{/is}}value="search">search</option>
@@ -30,7 +31,7 @@
 			<option {{#is type_override value="week"}}selected="selected"{{/is}}value="week">week</option>
 		</select>
 		<p class="description" id="{{_id}}-type_override-description">
-			<?php _e('Change the field type.','caldera-forms');?>
+			<?php esc_html_e('Change the field type.','caldera-forms');?>
 		</p>
 	</div>
 </div>
@@ -49,7 +50,7 @@
 		</div>
 	</div>
 	<div class="caldera-config-group">
-		<p class="description">e.g (aaa-99-999-a9-9*)</p>
+		<p class="description"><?php _e('e.g.', 'caldera-forms' ); ?>: aaa-99-999-a9-9*</p>
 		<ul>
 			<li>9 : <?php _e('numeric', 'caldera-forms'); ?></li>
 			<li>a : <?php _e('alphabetical', 'caldera-forms'); ?></li>
@@ -64,21 +65,4 @@
 	</div>
 </div>
 
-{{#script}}
-	jQuery(function($){
-
-		$('.{{_id}}_masked').change(function(){
-			if( $(this).prop('checked') ){
-				$('#{{_id}}_maskwrap').show();
-				$('#{{_id}}_default').inputmask($('#{{_id}}_mask').val(),{greedy: false});
-			}else{
-				$('#{{_id}}_maskwrap').hide();
-				$('#{{_id}}_default').inputmask('remove');
-			}
-		});	
-		$('#{{_id}}_mask, #{{_id}}_numeric').change(function(){
-			$('.{{_id}}_masked').trigger('change');
-		});
-		$('.{{_id}}_masked').trigger('change');
-	});
-{{/script}}
+<?php

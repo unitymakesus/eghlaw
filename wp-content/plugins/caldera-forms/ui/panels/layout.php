@@ -45,7 +45,7 @@ if(!empty($element['layout_grid']['fields'])){
 			// build config
 			ob_start();
 
-			field_wrapper_template( $field_id, $field['label'], $field['slug'], $field['caption'], ( isset($field['hide_label']) ? 1 : 0 ), ( isset($field['required']) ? 1 : 0 ),( isset($field['entry_list']) ? 1 : 0 ), $field['type'], $config_str, $conditions);
+			caldera_forms_field_wrapper_template( $field_id, $field['label'], $field['slug'], $field['caption'], ( isset($field['hide_label']) ? 1 : 0 ), ( isset($field['required']) ? 1 : 0 ),( isset($field['entry_list']) ? 1 : 0 ), $field['type'], $config_str, $conditions);
 			$field_config_panels[] = ob_get_clean();
 		}
 
@@ -104,7 +104,7 @@ foreach( (array) $element['layout_grid']['structure'] as $page_key=>$page_struct
 	</div>	
 <?php } ?>
 </div>
-<div class="add-new-item caldera-add-group caldera-add-row"><span class="dashicons dashicons-plus"></span></div>
+<div class="add-new-item caldera-add-group caldera-add-row"><span class="dashicons dashicons-plus" data-toggle="tooltip" data-placement="bottom" title="<?php esc_attr_e( 'Click to add a new row to layout.', 'caldera-forms' ); ?>"></span></div>
 <?php do_action( 'caldera_forms_layout_config', $element ); ?>
 <script type="text/html" id="grid-page-tmpl">
 	<div class="layout-grid-panel layout-grid" data-page="{{page_no}}" data-name="<?php echo __('Page', 'caldera-forms'); ?> {{count}}" style="display:none;" id="{{page_no}}">

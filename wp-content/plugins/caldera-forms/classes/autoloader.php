@@ -58,21 +58,38 @@ class Caldera_Forms_Autoloader {
 
 			if ( 'Caldera_Forms' == $class ) {
 				$file = $dir . 'core.php';
-			} elseif ( 'Caldera_Form_Grid' == $class ) {
+			} elseif ( 'Caldera_Forms_Fields' === $class ) {
+				$file = CFCORE_PATH . 'classes/fields.php';
+			} elseif ( 'Caldera_Forms_Magic' === $class ) {
+				$file = CFCORE_PATH . 'classes/magic.php';
+			}elseif ( 'Caldera_Form_Grid' === $class ) {
 				$file = $dir . 'caldera-grid.php';
-			} elseif( 'Caldera_Forms_Entry' == $class ) {
+			} elseif( 'Caldera_Forms_Entry' === $class ) {
 				$file = CFCORE_PATH . 'classes/entry.php';
 			} elseif ( 'Caldera_Forms_Save_Final' == $class ){
 				$file = CFCORE_PATH . 'classes/save.php';
-			} elseif( 'Caldera_Forms_Admin' == $class ){
+			} elseif( 'Caldera_Forms_Admin' === $class ){
 				$file = CFCORE_PATH . 'classes/admin.php';
-			}else {
+			} elseif( 'Caldera_Forms_CDN' == $class ){
+				$file = CFCORE_PATH . 'classes/cdn.php';
+			} elseif( 'Caldera_Forms_Settings' === $class ){
+				$file = CFCORE_PATH . 'classes/settings.php';
+            }else {
 				$file = $dir . self::get_base( $class, $root );
 			}
 
-
 			if ( is_file( $file ) ) {
 				require_once $file;
+			}else{
+				/**
+				 * Runs when the autoloader fails to load a file
+				 *
+				 * @since 1.5.1
+				 *
+				 * @param string $class Name of class that that was attempted to load
+				 * @param string $file File that that was attempted to require_once
+				 */
+				do_action( 'caldera_forms_autoloader_fail', $class );
 			}
 			
 		}
@@ -94,8 +111,6 @@ class Caldera_Forms_Autoloader {
 				return $root;
 			}
 		}
-
-
 	}
 
 	/**

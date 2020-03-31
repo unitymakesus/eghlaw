@@ -174,6 +174,8 @@ function egh_pro_legal_services() {
       $pro_bar = get_field( 'bar_admissions' );
       $pro_court = get_field( 'court_admissions' );
       $pro_affiliations = get_field( 'professional_affiliations' );
+      $appointments = get_field( 'appointments' );
+      $pro_licenses = get_field( 'professional_licenses' );
 
       if( $pro_bar ):
         $pro_bar = preg_replace("/(.*)/i", "<li>$1</li>", $pro_bar);
@@ -204,6 +206,27 @@ function egh_pro_legal_services() {
 
         echo '<h3>Professional Affiliations</h3>';
         echo '<ul>' . $pro_affiliations . '</ul>';
+      endif;
+
+      if( $appointments ):
+        $appointments = preg_replace("/^--(.*)/m", "<li>$1</li>", $appointments);  // Make 3rd level bullets
+        $appointments = preg_replace("/(<li>.*?<\/li>(?!\n<li>))/s", "<ul>$1</ul>", $appointments); // Wrap 3rd level bullets
+        $appointments = preg_replace("/^-(.*)/m", "<li>$1</li>", $appointments);  // Make 2nd level bullets
+        $appointments = preg_replace("/(<\/li>).?(<ul>.*?<\/ul>)/s", "\n$2</li>", $appointments);  // Nest 3rd level within 2nd level
+        $appointments = preg_replace("/(<li>.*?<\/li>(?!\n<li>)(?!<\/ul>))/s", "<ul>$1</ul>", $appointments);  // Wrap 2nd level bullets
+        $appointments = preg_replace("/(.+?)(?:$|\n)(?!<li>|<ul>)/s", "<li>$1</li>", $appointments);  // Make 1st level bullets
+
+        echo '<h3>Appointments</h3>';
+        echo '<ul>' . $appointments . '</ul>';
+      endif;
+
+
+    if($pro_licenses ):
+        $pro_licenses = preg_replace("/(.*)/i", "<li>$1</li>", $pro_licenses);
+        $pro_licenses = str_replace("<li></li>", "", $pro_licenses);
+
+        echo '<h3>Professional Licenses</h3>';
+        echo '<ul>' . $pro_licenses . '</ul>';
       endif;
 
       echo '</div>';

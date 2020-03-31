@@ -1,46 +1,52 @@
-(function($){
+( function( $ ) {
 
-	FLBuilder.registerModuleHelper('video', {
+	FLBuilder.registerModuleHelper( 'video', {
 
-		rules: {
-			embed_code: {
-				required: true
-			},
-			video: {
-				required: true
-			},
-		},
+		// rules: {
+		// 	service: {
+		// 		required: true
+		// 	}
+		// },
 
 		init: function()
 		{
-			var form = $('.fl-builder-settings'),
-				type = form.find('select[name=video_type]');
-			
-			type.on('change', this._typeChanged);
-			this._typeChanged();
-		},
-		
-		_typeChanged: function()
-		{
-			var form     = $('.fl-builder-settings'),
-				embed    = form.find('textarea[name=embed_code]'),
-				video    = form.find('input[name=video]'),
-				type     = form.find('select[name=video_type]').val();
 
-			embed.rules('remove');
-			video.rules('remove');
-			
-			if(type == 'embed') {
-				embed.rules('add', {
-					required: true
-				});
-			} 
-			else {
-				video.rules('add', {
-					required: true
-				});
+		},
+
+		submit: function()
+		{
+
+			var form      = $( '.fl-builder-settings' ),
+				enabled     = form.find( 'select[name=schema_enabled]' ).val(),
+				name        = form.find( 'input[name=name]' ).val(),
+				description = form.find( 'input[name=description]' ).val();
+				thumbnail   = form.find( 'input[name=thumbnail]' ).val();
+				update      = form.find( 'input[name=up_date]' ).val();
+
+			if( 'no' === enabled ) {
+				return true;
 			}
+
+			if ( 0 === name.length ) {
+				FLBuilder.alert( FLBuilderStrings.schemaAllRequiredMessage );
+				return false;
+			}
+			else if ( 0 === description.length ) {
+				FLBuilder.alert( FLBuilderStrings.schemaAllRequiredMessage );
+				return false;
+			}
+			else if ( 0 === thumbnail.length ) {
+
+				FLBuilder.alert( FLBuilderStrings.schemaAllRequiredMessage );
+
+				return false;
+			}
+			else if( 0 === update.length ) {
+				FLBuilder.alert( FLBuilderStrings.schemaAllRequiredMessage );
+				return false;
+			}
+
+			return true;
 		}
 	});
-
 })(jQuery);

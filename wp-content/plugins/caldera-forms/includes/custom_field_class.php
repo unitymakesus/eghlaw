@@ -35,7 +35,8 @@ function cf_live_gravatar_field($fieldtypes){
 		"field"			=>	"Gravatar",
 		"file"			=>	CFCORE_PATH . "fields/gravatar/field.php",
 		"category"		=>	__( 'Special' , 'caldera-forms' ),
-		"description" 	=> 'A live gravatar preview',
+		"description" 	=> __( 'A live gravatar preview', 'caldera-forms' ),
+		'icon'          => CFCORE_URL . 'assets/build/images/user.svg',
 		"setup"			=>	array(
 			"template"	=>	CFCORE_PATH . "fields/gravatar/config.php",
 			"preview"	=>	CFCORE_PATH . "fields/gravatar/preview.php",

@@ -10,6 +10,35 @@
  */
 ?>
 <div id="cf-email-settings-ui" aria-hidden="true" style="visibility: hidden;">
+	<div style="margin:20px;">
+		<div class="caldera-forms-clippy-zone-inner-wrap" style="background: white">
+			<div class="caldera-forms-clippy"
+			     style="text-align:center;background-color:white;padding:20px;">
+				<h2>
+					<?php esc_html_e( 'Getting WordPress email into an inbox just got a lot easier!', 'caldera-forms' ); ?>
+				</h2>
+				<p>
+					<?php
+					esc_html_e(
+						'SendWP makes getting emails delivered as simple as a few clicks. So you can relax, knowing those important emails are being delivered on time.',
+						'caldera-forms'
+					);
+					?>
+				</p>
+				<button
+					class="button button-primary"
+					style="display:block;margin:20px auto;"
+					onClick="caldera_forms_sendwp_remote_install()"
+					>
+					<?php esc_html_e('Signup for SendWP', 'caldera-forms'); ?>
+				</button>
+				<a href="https://sendwp.com?utm_source=Caldera+Forms+Plugin&utm_medium=Forms_Email+Settings&utm_campaign=SendWP+banner+ad"
+				   target="_blank" class="bt-btn btn btn-green" style="width: 80%;margin: auto;">
+					<?php esc_html_e( 'Learn More', 'caldera-forms' ); ?>
+				</a>
+			</div>
+		</div>
+	</div>
 	<div class="cf-emails-field-group caldera-config-group" id="cf-emails-api-wrap">
 		<label for="cf-emails-api" id="cf-emails-api-label">
 			<?php esc_html_e( 'Email System', 'caldera-forms' ); ?>
@@ -43,7 +72,7 @@
 					esc_html__( 'SendGrid API Key', 'caldera-forms' ),
 					'https://CalderaWP.com/docs/configure-sendgrid',
 					esc_attr__( 'Documentation for configuring SendGrid API', 'caldera-forms' ),
-					esc_html__( 'Lean more here.', 'Caldera Forms' )
+					esc_html__( 'Learn More', 'caldera-forms' )
 				);
 		?></p>
 

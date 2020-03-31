@@ -1,12 +1,19 @@
 /*
- * Google Maps Widget
- * (c) Web factory Ltd, 2012 - 2016
+ * Maps Widget for Google Maps
+ * (c) Web factory Ltd, 2012 - 2019
  */
 
 @import url(//fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light&amp;lang=en);
 
 .settings_page_gmw_options .form-table td {
   padding: 15px 10px;
+}
+
+ul.normal {
+  list-style-position: inside;
+  list-style-type: disc;
+  padding: 5px 0;
+  margin: 0 0 0 15px;
 }
 
 .wrap.gmw-options .ui-tabs {
@@ -28,8 +35,8 @@
 }
 
 .wrap.gmw-options .ui-tabs li a {
-  color: #908E8E;
-  font-weight: bold;
+  color: #464646;
+  font-weight: normal;
   font-size: 13px;
   padding: 0 20px;
 }
@@ -104,6 +111,14 @@
   width: 100%;
 }
 
+.gmw-tabs .widefat {
+  max-width: 99%;
+}
+
+.gmw-tabs input:invalid {
+  border: 1px solid red;
+}
+
 .gmw-tabs input {
   max-width: 330px;
 }
@@ -114,8 +129,14 @@ option.gmw_promo {
 
 .gmw-api-key-error {
   border: 1px solid #ff3f3f;
-  color: #ff3f3f;
   padding: 10px 15px;
+  text-align: justify;
+}
+
+.gmw-upgrade-notice-widget {
+  border: 1px solid #008ec2;
+  padding: 10px 15px;
+  text-align: justify;
 }
 
 body.widgets-php .select2-container--default .select2-results__option[aria-disabled=true] {
@@ -125,6 +146,7 @@ body.widgets-php .select2-container--default .select2-results__option[aria-disab
 #gmw_promo_dialog {
   padding: 0;
   display: none;
+  overflow: hidden;
 }
 
 .gmw-dialog {
@@ -212,14 +234,6 @@ body.widgets-php .select2-container--default .select2-results__option[aria-disab
   color: #fe4765;
 }
 
-.gmw-dialog h3 {
-  line-height: 150%;
-  font-weight: normal;
-  margin: 0 0 30px 0;
-  font-size: 1.1em;
-  color: #666666;
-}
-
 .gmw-dialog .ui-dialog-title {
   line-height: 60px;
   color: rgb(137, 137, 137);
@@ -289,7 +303,7 @@ a.button.button-secondary.gmw_spinner, a.button.button-primary.gmw_spinner {
 }
 
 .gmw_disabled {
-  pointer-events: none;  
+  pointer-events: none;
   opacity: .65;
   filter: alpha(opacity=65);
 }
@@ -423,7 +437,7 @@ input:required:invalid, #gmw_promo_dialog input:required:invalid {
  */
 .ui-tabs { position: relative; padding: 0; zoom: 1;margin-top:25px } /* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
 .ui-tabs .ui-tabs-nav { margin: 0; padding: 0 0 0 5px; box-sizing: border-box; }
-.ui-tabs .ui-tabs-nav li { list-style: none; float: left; position: relative; top: 1px; margin: 0 .2em 1px 0; border-bottom: 0 !important; padding: 0; white-space: nowrap; }
+.ui-tabs .ui-tabs-nav li { list-style: none; float: left; position: relative; top: 2px; margin: 0 .2em 1px 0; border-bottom: 0 !important; padding: 0; white-space: nowrap; }
 .ui-tabs .ui-tabs-nav li a { text-decoration: none; outline: none; box-shadow: none; }
 .ui-tabs .ui-tabs-nav li.ui-tabs-selected { margin-bottom: 0; border-bottom: 1px solid white !important; }
 .ui-tabs .ui-tabs-nav li.ui-tabs-active { margin-bottom: -1px; border-bottom: 3px solid white !important; }
@@ -464,7 +478,7 @@ ul.ui-tabs-nav{
 }
 
 .ui-state-hover a, .ui-state-active a {
-  color: #464646 !important;
+  color: #333333 !important;
 }
 
 .ui-state-hover a {
@@ -481,7 +495,7 @@ ul.ui-tabs-nav{
 #customize-theme-controls .ui-tabs .ui-tabs-nav li.ui-tabs-active {
   border-bottom: 3px solid white !important;
 }
-#customize-theme-controls .ui-tabs .ui-tabs-panel { 
+#customize-theme-controls .ui-tabs .ui-tabs-panel {
   min-width: 440px;
 }
 #available-widgets-list [class*=googlemapswidget] .widget-title:before{
@@ -514,7 +528,7 @@ ul.ui-tabs-nav{
 }
 
 .gmw-content-box i {
-  color: #fff;  
+  color: #fff;
 }
 
 .gmw-content-box-alternate h3,
@@ -615,31 +629,6 @@ ul.ui-tabs-nav{
   background: rgba(0,0,0,0.15);
 }
 
-.gmw_goto_trial.button-secondary {
-  border: 2px solid #666;
-  box-shadow: none !important;
-  border-radius: 4px;
-  background: #fff;
-  color: #666 !important;
-  font-weight: bold;
-  text-transform: uppercase;
-  font-size: 12px;
-  padding: 10px 20px;
-  text-shadow:none !important;
-  height: auto !important;
-  margin-left: 20px;
-  margin-top: 20px;
-}
-
-.gmw_goto_trial.button-secondary:hover {
-  background: rgba(0,0,0,0.15);
-}
-
-.footer .gmw_goto_trial {
-  background: #f5f5f5;
-  margin-top: 0;
-}
-
 .gmw-footer-intro {
   display: block;
   padding: 30px 40px;
@@ -700,36 +689,16 @@ ul.ui-tabs-nav{
   color: #fff !important;
 }
 
-/* Trial */
-#gmw_dialog_trial .content {
-  padding: 40px 130px 15px 130px;
-  background-color: #5fb5d8;
-  border: 1px solid #5fb5d8;
-}
 
 #gmw_dialog_subscribe .content a {
   color: #0085ba;
-}
-
-#gmw_dialog_trial h3 {
-  text-align: center;
-  color: #fff;
-}
-
-#gmw_dialog_trial input[type="text"] {
-  border: 1px solid #dcdcdc;
-  box-shadow:none;
-  padding: 25px !important;
-  height: 60px !important;
-  display: block;
-  border-radius:3px;
 }
 
 #gmw_promo_dialog input[type="text"]:focus {
   border: 1px solid #5b9dd9;
 }
 
-#gmw_dialog_trial .button.button-primary, #gmw_dialog_activate .button.button-primary {
+#gmw_dialog_activate .button.button-primary {
   display: block;
   border-radius:4px;
   background: #0085ba;
@@ -743,18 +712,9 @@ ul.ui-tabs-nav{
   box-shadow: none !important;
 }
 
-#gmw_dialog_trial .button.button-primary:hover {
-  background: #00719e !important;
-}
-
-#gmw_dialog_subscribe .footer, #gmw_dialog_trial .footer {
+#gmw_dialog_subscribe .footer {
   background: #5fb5d8;
 }
-
-#gmw_dialog_trial .footer {
-  padding: 15px 135px 50px 135px; 
-}
-
 
 #gmw_dialog_subscribe .footer p,
 #gmw_dialog_subscribe .footer ul li {
@@ -773,7 +733,7 @@ ul.ui-tabs-nav{
   padding-left: 15px;
   color: #797979;
 }
-.gmw_pointer h3:before, .gmw_pointer .wp-pointer-buttons {
+.gmw_pointer h3:before, .gmw_pointer:not(.show_dismiss) .wp-pointer-buttons {
   display: none;
 }
 
@@ -833,27 +793,29 @@ ul.ui-tabs-nav{
   margin-top: 5px !important;
 }
 
-#gmw_dialog_pro_features .list-left {
-  width: 65%;
+#gmw_dialog_pro_features .features-left {
+  width: 50%;
   display: inline-block;
   vertical-align: top;
-  margin: 0;
-  padding: 0;
-} 
+}
+#gmw_dialog_pro_features .features-right {
+  width: 50%;
+  display: inline-block;
+  vertical-align: top;
+}
 
-#gmw_dialog_pro_features .list-right {
-  width: 33%;
+#gmw_dialog_pro_features .features-list {
   display: inline-block;
   vertical-align: top;
-  margin: 0;
+  margin: 10px 0 0 0;
   padding: 0;
 }
 
 #gmw_dialog_pro_features li {
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   list-style-position: inside;
-  text-indent: -1em;
-  padding-left: 1em;
+  text-indent: -18px;
+  padding-left: 18px;
 }
 
 #gmw_dialog_pro_features li:first-letter {
@@ -890,13 +852,66 @@ ul.ui-tabs-nav{
 }
 
 .gmw_goto_intro.button-secondary:hover {
-  background: rgba(0,0,0,0.15);
-  color: #999 !important;
+  background: #d54e21;
+  border-color: #d54e21;
+  color: #fff !important;
+}
+
+#gmw-pricing-table {
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  border-spacing: 0;
+}
+#gmw-pricing-table td {
+  width: 33%;
+  margin: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.53);
+  font-size: 14.5px;
+  color: #fff;
+  padding: 10px 30px 10px 30px;
+  opacity: 0.85;
+}
+#gmw-pricing-table tr {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+#gmw-pricing-table tr td:first-child {
+  background-color: #0085ba;
+}
+#gmw-pricing-table tr td:nth-child(2) {
+  background-color: #1fbc61;
+}
+#gmw-pricing-table tr td:last-child {
+  background-color: #3ba266;
+}
+
+#gmw-pricing-table h3 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+  margin: 0;
+  padding: 10px 0 0 0;
+  line-height: 115%;
+  text-align: center;
+}
+
+#gmw-pricing-table td.hover {
+  opacity: 1;
+}
+#gmw-pricing-table .dashicons {
+  width: auto;
+  display: inline-block !important;
 }
 
 .gmw-promo-box {
-  padding: 28px 40px;
-  height: 70px;
+  padding: 20px 5px;
+  width: 33%;
+  display: inline-block;
+  box-sizing: border-box;
 }
 
 .gmw-promo-box * {
@@ -914,36 +929,51 @@ ul.ui-tabs-nav{
 }
 
 .gmw-promo-icon {
-  display: inline-block;
-  width: 67px;
+  display: block;
   text-align: center;
 }
 
 .gmw-promo-icon img {
   display: inline-block;
+  height: 40px;
 }
 
 .gmw-promo-box-agency .gmw-promo-icon img, .gmw-promo-box-lifetime .gmw-promo-icon img {
   margin-top: 20px;
 }
 
+.gmw-promo-button:hover {
+  background-color: rgba(0,0,0,0.3);
+}
+
 .gmw-promo-button {
   border: 2px solid #fff;
   border-radius: 10px;
-  display: inline-block;
+  display: block;
   font-weight: bold;
   font-size: 22px;
-  width: 140px;
+  width: 180px;
   text-align: center;
   color: #fff;
-  position: absolute;
-  right: 40px;
   text-transform: uppercase;
-  margin-top: 4px;
+  margin: 15px auto 15px auto;
+}
+
+.gmw-promo-button small {
+  font-size: x-small;
+  line-height: 0px;
+}
+
+#gmw-pricing-table .instant-download {
+  text-align: center;
+  display: inline-block;
+  font-style: italic;
+  margin: 0 -20px 10px -20px;
 }
 
 .gmw-promo-button a {
   color: white;
+  width: 100%;
   padding: 20px 0;
   display: inline-block;
   text-decoration: none;
@@ -971,49 +1001,49 @@ ul.ui-tabs-nav{
   border: 1px solid #fff;
 }
 
+#gmw-pricing-table tr td:first-child .gmw-promo-button span {
+  color: #0085ba;
+}
+
 .gmw-promo-description {
-  display: inline-block;
-  padding: 0 0 0 30px;
-  vertical-align: top;
+  padding: 0;
 }
 
 .gmw-promo-description h3 {
   font-size: 24px;
   font-weight: bold;
-  display: inline-block;
+  display: block;
   color: #fff;
   margin: 0;
   padding: 0;
+  line-height: 120%;
+  text-align: center;
 }
 
 .gmw-promo-description span {
   font-size: 14.5px;
-  display: inline-block;
+  display: block;
   color: #fff;
 }
 
 .gmw-promo-box-lifetime {
-  background-color: #1fbc61;  
+  background-color: #1fbc61;
 }
 
 .gmw-promo-box-agency {
-  background-color: #3ba266;  
+  background-color: #3ba266;
 }
 
 .gmw-promo-box-yearly {
-  background-color: #0085ba;  
+  background-color: #0085ba;
 }
 
 .gmw-promo-box-yearly .gmw-promo-button {
   text-transform: none;
 }
 
-.gmw-promo-box-trial {
-  background-color: #5fb5d8;  
-}
-
 #gmw_dialog_intro .header {
-  padding: 30px 95px;
+  padding: 30px 80px;
   color: #666;
   text-align: center;
   font-size: 15px;

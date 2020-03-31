@@ -11,12 +11,28 @@
  */
 abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 
+	/**
+	 * Form object for this response
+	 *
+	 * @since 1.5.0
+	 *
+	 * @var Caldera_Forms_API_Form|Caldera_Forms_API_Privacy
+	 */
+	protected $form;
+
+	/**
+	 * Namespace for API
+	 *
+	 * @since 1.5.0
+	 *
+	 * @var string
+	 */
 	protected $namespace;
 
 	/**
 	 * @inheritdoc
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 */
 	public function add_routes( $namespace ) {
 		$this->namespace = $namespace;
@@ -40,11 +56,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
-					'args'                => array(
-						'context' => array(
-							'default' => 'view',
-						)
-					),
+					'args'                => $this->get_item_args()
 				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
@@ -80,6 +92,25 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 		) );
 	}
 
+    /**
+     * Get the allow attributes for get items calls
+     *
+     * @since unknown
+     *
+     * @return array
+     */
+	public function get_item_args(){
+		return array(
+			'context' => array(
+				'default' => 'view',
+			),
+			'entry_list_only_fields' => array(
+				'required' => false,
+				'default' => false,
+			)
+		);
+	}
+
 	/**
 	 * Callback for the index of this collection
 	 *
@@ -110,21 +141,32 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	}
 
 	/**
-	 * Define query arguments
+	 * Define query arguments for GET requests
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
-	 * @return array(
+	 * @return array
 	 */
 	public function request_args(){
 		//must ovveride, should be abstract but PHP5.2
 		_doing_it_wrong( __FUNCTION__, '', '1.5.0' );
 	}
-	
+
+    /**
+     * Define query arguments for POST/PUT requests
+     *
+     * @since 1.8.0
+     *
+     * @return array
+     */
+	public function args_for_create(){
+        return $this->request_args();
+    }
+
 	/**
 	 * Check if a given request has access to get items
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|bool
@@ -137,7 +179,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Check if a given request has access to get a specific item
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|bool
@@ -149,7 +191,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Check if a given request has access to create items
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|bool
@@ -162,7 +204,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Check if a given request has access to update a specific item
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|bool
@@ -174,7 +216,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Check if a given request has access to delete a specific item
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|bool
@@ -186,7 +228,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Get a collection of items
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|\WP_REST_Response
@@ -198,7 +240,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Get one item from the collection
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|\WP_REST_Response
@@ -210,7 +252,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Create one item from the collection
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return Caldera_Forms_API_Response|Caldera_Forms_API_Error
@@ -222,7 +264,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Update one item from the collection
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return Caldera_Forms_API_Response|Caldera_Forms_API_Error
@@ -234,7 +276,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Delete one item from the collection
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return Caldera_Forms_API_Response|Caldera_Forms_API_Error
@@ -246,19 +288,19 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	/**
 	 * Return a 501 error for non-existant route
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @return Caldera_Forms_API_Response
 	 */
 	protected function not_yet_response() {
 		$error =  new Caldera_Forms_API_Error( 'not-implemented-yet', __( 'Route Not Yet Implemented :(', 'caldera-forms' )  );
-		return new Caldera_Forms_API_Response( $error, 501, [] );
+		return new Caldera_Forms_API_Response( $error, 501, array() );
 	}
 
 	/**
 	 * Get class shortname and use as base
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * MUST  ovveride in subclass with a hardcoded string.
 	 */
@@ -272,7 +314,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	 *
 	 * Used by for get_items() and create_items()
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @return string
 	 */
@@ -286,7 +328,7 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 	 *
 	 * Used by for get_item() and update_time() and delete_item()
 	 *
-	 @since 1.4.4
+	 * @since 1.4.4 
 	 *
 	 * @return string
 	 */
@@ -312,6 +354,42 @@ abstract class Caldera_Forms_API_CRUD implements Caldera_Forms_API_Route {
 				'sanitize_callback' => 'absint',
 			)
 		);
+	}
+
+	/**
+	 * Factory for Caldera_Forms_API_Form objects
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $id Form ID
+	 * @param WP_REST_Request $request Current REST API request
+	 * @param bool $set_prop Optional. Set in $form property of object if true, the default. If false, return.
+	 * @param bool $privacy_context Optional. If false, a Caldera_Forms_API_Privacy is returned. If true, the default, a Caldera_Forms_API_Form is returned.
+	 *
+	 * @return Caldera_Forms_API_Form|Caldera_Forms_API_Privacy
+	 * @throws Exception
+	 */
+	protected function form_object_factory( $id, WP_REST_Request $request, $set_prop = true, $privacy_context= false ){
+	    $form = Caldera_Forms_Forms::get_form( $id );
+
+		if( empty( $form ) || ( empty( $form[ 'ID' ] ) && empty( $form[ 'name' ] ) ) ){
+			throw new Exception();
+		}
+
+        if ($privacy_context) {
+            $obj = new Caldera_Forms_API_Form($form);
+        }else{
+		    $obj = new Caldera_Forms_API_Privacy($form);
+        }
+
+        $obj->set_request( $request );
+		if ( $set_prop ) {
+			$this->form = $obj;
+		} else {
+
+			return $obj;
+		}
+
 	}
 
 }

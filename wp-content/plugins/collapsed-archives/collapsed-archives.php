@@ -3,9 +3,9 @@
 Plugin Name: Collapsed Archives
 Plugin URI: https://github.com/mpetroff/collapsed-archives-wp
 Description: Adds a widget to display archive links using purely CSS-based collapsing.
-Version: 1.1
+Version: 1.5
 Author: Matthew Petroff
-Author URI: http://mpetroff.net/
+Author URI: https://mpetroff.net/
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
@@ -18,6 +18,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
  *     @type bool       $show_post_count Whether to display the post count alongside the link. Default false.
  *     @type bool       $use_triangles   Whether to use triangles to indicate expansion instead of +/-. Default false.
+ *     @type bool       $never_expand    Whether to never expand for date (normally expands for current post). Default false.
  *     @type string     $order           Whether to use ascending or descending order. Accepts 'ASC', or 'DESC'.
  *                                       Default 'DESC'.
  * }
@@ -29,6 +30,7 @@ function collapsed_archives_get_collapsed_archives( $args = '' ) {
     $defaults = array(
         'show_post_count' => false,
         'use_triangles' => false,
+        'never_expand' => false,
         'order' => 'DESC',
     );
 
@@ -63,24 +65,26 @@ function collapsed_archives_get_collapsed_archives( $args = '' ) {
             $output .= ' collapsed-archives-triangles';
         }
         $output .= '"><ul>';
-
+        
         $prev_year = false;
         foreach ( (array) $results as $result ) {
             if ( $prev_year != $result->year ) {
                 if ( $prev_year !== false ) {
                     $output .= '</ul></li>';
                 }
-
+                
                 $year_id = 'archive-year-' . $result->year;
-
+                
                 $output .= '<li>';
                 $output .= '<input type="checkbox" id="' . $year_id . '"';
-                if ( ( $result->year == get_the_date('Y', $wp_query->post->ID) && !is_page() ) || ( is_page() && $result->year == date('Y') ) ) {
-                    $output .= ' checked';
+                if ( isset( $wp_query->post->ID ) ) {
+                    if ( !$r['never_expand'] && ( ( $result->year == get_the_date('Y', $wp_query->post->ID) && !is_page() ) || ( is_page() && $result->year == date('Y') ) ) ) {
+                        $output .= ' checked';
+                    }
                 }
                 $output .= '>';
                 $output .= '<label for="' . $year_id . '"></label>';
-
+                
                 $url = get_year_link( $result->year );
                 $after = '';
                 if ( $r['show_post_count'] ) {
@@ -88,12 +92,12 @@ function collapsed_archives_get_collapsed_archives( $args = '' ) {
                     $after = '&nbsp;(' . $year_query->found_posts . ')';
                 }
                 $output .= get_archives_link( $url, $result->year, '', '', $after );
-
+                
                 $output .= '<ul>';
-
+                
                 $prev_year = $result->year;
             }
-
+            
             $url = get_month_link( $result->year, $result->month );
             /* translators: 1: month name */
             $text = sprintf( __( '%1$s' ), $wp_locale->get_month( $result->month ) );
@@ -103,9 +107,9 @@ function collapsed_archives_get_collapsed_archives( $args = '' ) {
             }
             $output .= get_archives_link( $url, $text, 'html', '', $after );
         }
+        $output .= '</ul></li></ul></div>';
     }
-    $output .= '</ul></li></ul></div>';
-
+    
     return $output;
 } // function get_collapsed_archives
 
@@ -123,25 +127,27 @@ class Collapsed_Archives_Widget extends WP_Widget {
     }
 
     public function widget( $args, $instance ) {
-
+    
         $title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Archives' ) : $instance['title'], $instance, $this->id_base );
         $count = ! empty( $instance['count'] ) ? '1' : '0';
         $use_triangles = ! empty( $instance['use_triangles'] ) ? '1' : '0';
+        $never_expand = ! empty( $instance['never_expand'] ) ? '1' : '0';
         $order = ! empty( $instance['asc_order'] ) ? 'ASC' : 'DESC';
-
+        
         echo $args['before_widget'];
         if ( $title ) {
             echo $args['before_title'] . $title . $args['after_title'];
         }
-        echo collapsed_archives_get_collapsed_archives( array( 'show_post_count' => $count, 'use_triangles' => $use_triangles, 'order' => $order ) );
+        echo collapsed_archives_get_collapsed_archives( array( 'show_post_count' => $count, 'use_triangles' => $use_triangles, 'never_expand' => $never_expand, 'order' => $order ) );
         echo $args['after_widget'];
     }
 
     public function form( $instance ) {
-        $instance = wp_parse_args( (array) $instance, array( 'title' => '', 'count' => 0, 'use_triangles' => 0, 'asc_order' => 0 ) );
+        $instance = wp_parse_args( (array) $instance, array( 'title' => '', 'count' => 0, 'use_triangles' => 0, 'never_expand' => 0, 'asc_order' => 0 ) );
         $title = strip_tags($instance['title']);
         $count = $instance['count'] ? 'checked="checked"' : '';
         $use_triangles = $instance['use_triangles'] ? 'checked="checked"' : '';
+        $never_expand = $instance['never_expand'] ? 'checked="checked"' : '';
         $asc_order = $instance['asc_order'] ? 'checked="checked"' : '';
         ?>
         <p>
@@ -152,19 +158,22 @@ class Collapsed_Archives_Widget extends WP_Widget {
         <br/>
         <input class="checkbox" type="checkbox" <?php echo $use_triangles; ?> id="<?php echo $this->get_field_id('use_triangles'); ?>" name="<?php echo $this->get_field_name('use_triangles'); ?>" /> <label for="<?php echo $this->get_field_id('use_triangles'); ?>"><?php _e('Use triangles to indicate expansion instead of +/-.'); ?></label>
         <br/>
+        <input class="checkbox" type="checkbox" <?php echo $never_expand; ?> id="<?php echo $this->get_field_id('never_expand'); ?>" name="<?php echo $this->get_field_name('never_expand'); ?>" /> <label for="<?php echo $this->get_field_id('never_expand'); ?>"><?php _e('Don\'t expand list for current post / year.'); ?></label>
+        <br/>
         <input class="checkbox" type="checkbox" <?php echo $asc_order; ?> id="<?php echo $this->get_field_id('asc_order'); ?>" name="<?php echo $this->get_field_name('asc_order'); ?>" /> <label for="<?php echo $this->get_field_id('asc_order'); ?>"><?php _e('Display archives in chronological order instead of reverse chronological order.'); ?></label>
         </p>
-        <?php
+        <?php 
     }
 
     public function update( $new_instance, $old_instance ) {
         $instance = $old_instance;
-        $new_instance = wp_parse_args( (array) $new_instance, array( 'title' => '', 'count' => 0, 'use_triangles' => 0, 'asc_order' => 0 ) );
+        $new_instance = wp_parse_args( (array) $new_instance, array( 'title' => '', 'count' => 0, 'use_triangles' => 0, 'never_expand' => 0, 'asc_order' => 0 ) );
         $instance['title'] = strip_tags($new_instance['title']);
         $instance['count'] = $new_instance['count'] ? 1 : 0;
         $instance['use_triangles'] = $new_instance['use_triangles'] ? 1 : 0;
+        $instance['never_expand'] = $new_instance['never_expand'] ? 1 : 0;
         $instance['asc_order'] = $new_instance['asc_order'] ? 1 : 0;
-
+        
         return $instance;
     }
 
@@ -173,7 +182,10 @@ class Collapsed_Archives_Widget extends WP_Widget {
 /**
  * Register widget
  */
-add_action( 'widgets_init', create_function( '', 'return register_widget("Collapsed_Archives_Widget");' ) );
+function collapsed_archives_register_widgets() {
+    register_widget( 'Collapsed_Archives_Widget' );
+}
+add_action( 'widgets_init', 'collapsed_archives_register_widgets' );
 
 /**
  * Enqueue widget CSS

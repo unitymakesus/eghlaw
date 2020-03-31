@@ -3,12 +3,13 @@
 // Just some basics.
 $per_page_limit = 20;
 
-
+Caldera_Forms::check_tables();
 // get all forms
-$forms = Caldera_Forms_Forms::get_forms( true );
+$orderby = isset( $_GET[ Caldera_Forms_Admin::ORDERBY_KEY ] ) && 'name' == $_GET[ Caldera_Forms_Admin::ORDERBY_KEY ] ? 'name' : false;
+$forms = Caldera_Forms_Forms::get_forms( true, false, $orderby );
 $forms = apply_filters( 'caldera_forms_admin_forms', $forms );
 
-$entry_perpage = get_option( '_caldera_forms_entry_perpage', 20 );
+
 $style_includes = get_option( '_caldera_forms_styleincludes' );
 if(empty($style_includes)){
 	$style_includes = array(
@@ -20,50 +21,109 @@ if(empty($style_includes)){
 }
 
 
-// load fields
-//$field_types = apply_filters( 'caldera_forms_get_field_types', array() );
 
 // create user modal buttons
 $modal_new_form = esc_html__('Create Form', 'caldera-forms').'|{"data-action" : "create_form", "data-active-class": "disabled", "data-load-class": "disabled", "data-callback": "new_form_redirect", "data-before" : "serialize_modal_form", "data-modal-autoclose" : "new_form" }|right';
 
 ?><div class="caldera-editor-header">
-	<ul class="caldera-editor-header-nav">
-		<li class="caldera-editor-logo">
-			<span class="caldera-forms-name">Caldera Forms</span>
-		</li>
-		<li class="caldera-forms-version">
-			<?php echo CFCORE_VER; ?>
-		</li>
-		<li class="caldera-forms-toolbar-item">
-			<a class="button button-primary ajax-trigger" data-request="start_new_form" data-modal-no-buttons='<?php echo $modal_new_form; ?>' data-modal-width="70%" data-modal-height="80%" data-load-class="none" data-modal="new_form" data-nonce="<?php echo wp_create_nonce( 'cf_create_form' ); ?>" data-modal-title="<?php echo __('Create New Form', 'caldera-forms'); ?>" data-template="#new-form-tmpl">
-			<?php echo __('New Form', 'caldera-forms'); ?>
-			</a>
-		</li>
-		<li class="caldera-forms-toolbar-item">
-			<a class="button ajax-trigger" data-request="start_new_form" data-modal-width="400" data-modal-height="192" data-modal-element="div" data-load-class="none" data-modal="import_form" data-template="#import-form-tmpl" data-modal-title="<?php echo __('Import Form', 'caldera-forms'); ?>" ><?php echo __('Import', 'caldera-forms'); ?></a>
-		</li>
-		<li class="caldera-forms-toolbar-item separator">&nbsp;&nbsp;</li>
-		<li class="caldera-forms-toolbar-item" id="cf-email-settings-item">
-			<?php
-				printf( '<button class="button" id="cf-email-settings" title="%s">%s</button>',
-					esc_attr__( 'Click to modify Caldera Forms email settings', 'caldera-forms'  ),
-					esc_html__( 'Email Settings', 'caldera-forms' )
-				);
-			?>
-		</li>
-		<li class="caldera-forms-toolbar-item separator">&nbsp;&nbsp;</li>
-		<li class="caldera-forms-toolbar-item">
-			<a class="button ajax-trigger cf-general-settings" data-request="toggle_front_end_settings" data-modal-width="400" data-modal-height="400" data-modal-element="div" data-load-class="none" data-modal="front_settings" data-template="#front-settings-tmpl" data-callback="toggle_front_end_settings" data-modal-title="<?php echo __('General Settings', 'caldera-forms'); ?>" title="<?php echo __('General Settings', 'caldera-forms'); ?>" >
-			<?php
-				printf( '<span title="%s">%s</span>',
-					esc_attr__( 'Click to modify Caldera Forms general settings', 'caldera-forms'  ),
-					esc_html__( 'General Settings', 'caldera-forms' )
-				);
-			?>
-			</a>
-		</li>
 
-	</ul>
+        <ul class="caldera-editor-header-nav">
+            <li class="caldera-editor-logo">
+                <span class="caldera-forms-name">Caldera Forms</span>
+            </li>
+            <?php $deprecated = Caldera_Forms_Admin_PHP::is_version_deprecated( PHP_VERSION );
+            if ( ! $deprecated ): ?>
+                <li class="caldera-forms-version">
+                    <?php echo CFCORE_VER; ?>
+                </li>
+                <li class="caldera-forms-toolbar-item">
+                    <button class="button button-primary ajax-trigger cf-new-form-button"
+                            data-request="start_new_form"
+                            data-modal-no-buttons='<?php echo $modal_new_form; ?>'
+                            data-modal-width="70%"
+                            data-modal-height="80%"
+                            data-load-class="none" data-modal="new_form"
+                            data-nonce="<?php echo wp_create_nonce('cf_create_form'); ?>"
+                            data-modal-title="<?php esc_attr_e('Create New Form', 'caldera-forms' ); ?>"
+                            data-template="#new-form-tmpl">
+                        <?php  esc_html_e('New Form', 'caldera-forms'); ?>
+                    </button>
+                </li>
+                <li class="caldera-forms-toolbar-item">
+                    <button class="button ajax-trigger"
+                            data-request="start_new_form"
+                            data-modal-width="400"
+                            data-modal-height="270"
+                            data-modal-element="div"
+                            data-load-class="none"
+                            data-modal="import_form"
+                            data-template="#import-form-tmpl"
+                            data-modal-title="<?php esc_attr_e('Import Form', 'caldera-forms' ); ?>">
+                        <?php  esc_html_e('Import', 'caldera-forms'); ?>
+                    </button>
+                </li>
+                <li class="caldera-forms-toolbar-item separator">&nbsp;&nbsp;</li>
+                <li class="caldera-forms-toolbar-item" id="cf-email-settings-item">
+                    <?php
+                    printf('<button class="button" id="cf-email-settings" title="%s">%s</button>',
+                        esc_attr__('Click to modify Caldera Forms email settings', 'caldera-forms'),
+                        esc_html__('Email Settings', 'caldera-forms')
+                    );
+                    ?>
+                </li>
+                <li class="caldera-forms-toolbar-item separator">&nbsp;&nbsp;</li>
+                <li class="caldera-forms-toolbar-item">
+                    <button class="button ajax-trigger cf-general-settings" data-request="toggle_front_end_settings"
+                            data-modal-width="400" data-modal-height="405" data-modal-element="div" data-load-class="none"
+                            data-modal="front_settings" data-template="#front-settings-tmpl"
+                            data-callback="toggle_front_end_settings"
+                            data-modal-title="<?php esc_attr_e('General Settings', 'caldera-forms'); ?>"
+                            title="<?php esc_attr_e('General Settings', 'caldera-forms'); ?>">
+                        <?php
+                        printf('<span title="%s">%s</span>',
+                            esc_attr__('Click to modify Caldera Forms general settings', 'caldera-forms'),
+                            esc_html__('General Settings', 'caldera-forms')
+                        );
+                        ?>
+                    </button>
+                </li>
+                <li class="caldera-forms-toolbar-item separator">&nbsp;&nbsp;</li>
+                <li class="caldera-forms-toolbar-item" id="cf-form-order-item">
+                    <?php
+                    if ('name' === $orderby) {
+                        $text = __('Order Forms By ID', 'caldera-forms');
+                        $url = Caldera_Forms_Admin::main_admin_page_url();
+                    } else {
+                        $text = __('Order Forms By Name', 'caldera-forms');
+                        $url = Caldera_Forms_Admin::main_admin_page_url('name');
+                    }
+                    printf('<a  class="button" id="cf-form-order" title="%s" href="%s">%s</a>',
+                        esc_attr__('Click to change order of the forms', 'caldera-forms'),
+                        esc_url($url),
+                        esc_html__($text)
+                    );
+                    ?>
+                </li>
+                <li class="caldera-forms-toolbar-item separator caldera-forms-hide-when-entry-viewer-closed">&nbsp;&nbsp;</li>
+                <li class="caldera-forms-toolbar-item caldera-forms-hide-when-entry-viewer-closed" id="caldera-forms-close-entry-viewer-wrap" style="display: none;visibility: hidden" aria-hidden="true">
+                    <?php
+                    printf('<button title="%s" class="button" id="caldera-forms-close-entry-viewer">%s</button>',
+                        esc_attr__('Click to close entry Viewer', 'caldera-forms'),
+                        esc_html__('Close Entry Viewer', 'caldera-forms')
+                    );
+                    ?>
+                </li>
+                <?php if (isset($_GET['message_resent'])) { ?>
+                    <li class="caldera-forms-toolbar-item separator">&nbsp;&nbsp;</li>
+                    <li class="caldera-forms-toolbar-item success">
+                        <?php esc_html_e('Message Resent', 'caldera-forms'); ?>
+                    </li>
+            <?php } ?>
+            <?php else : //is deprecated
+                echo '<li id="cf-deprecated-notice-wrap cf-alert-wrap"><span class="cf-alert cf-alert-error">' . Caldera_Forms_Admin_PHP::get_deprecated_notice() . '</span></li>';
+            endif; //php version depreacted ?>
+        </ul>
+
 </div>
 
 <div class="form-admin-page-wrap">
@@ -112,41 +172,47 @@ $modal_new_form = esc_html__('Create Form', 'caldera-forms').'|{"data-action" : 
 
 				?>
 
-				<tr id="form_row_<?php echo $form_id; ?>" class="<?php echo $class; ?> form_entry_row">
+				<tr id="<?php  echo esc_attr( trim( 'form_row_' . $form_id ) ); ?>" class="<?php echo $class; ?> form_entry_row">
 					<td class="<?php if( !empty( $form['form_draft'] ) ) { echo 'draft-form'; }else{ echo 'active-form'; } ?>">
-						<span class="cf-form-name-preview"><?php echo $form['name']; ?></span> <input readonly type="text" class="cf-shortcode-preview" value="<?php echo esc_attr( '[caldera_form id="' . $form['ID'] . '"]'); ?>"> <span class="cf-form-shortcode-preview"><?php echo esc_html__( 'Get Shortcode', 'caldera-forms' ); ?></span>
+						<span class="cf-form-name-preview"><?php esc_html_e( $form[ 'name' ] ); ?></span> <input readonly type="text" class="cf-shortcode-preview" value="<?php echo esc_attr( '[caldera_form id="' . trim( $form[ 'ID' ] ) . '"]'); ?>"> <span class="cf-form-shortcode-preview"><?php echo esc_html__( 'Get Shortcode', 'caldera-forms' ); ?></span>
 
 						<?php if( !empty( $form['debug_mailer'] ) ) { ?>
 						<span style="color: rgb(207, 0, 0);" class="description"><?php _e('Mailer Debug enabled.', 'caldera-forms') ;?></span>
 						<?php } ?>
 
 						<div class="row-actions">
-						<?php if( empty( $form['_external_form'] ) ){ ?><span class="edit"><a class="form-control" href="admin.php?page=caldera-forms&edit=<?php echo $form_id; ?>"><?php echo __('Edit'); ?></a> | </span>
+						<?php if( empty( $form['_external_form'] ) ){ ?><span class="edit"><a class="form-control" href="<?php echo esc_url( Caldera_Forms_Admin::form_edit_link( $form_id ) ); ?>"><?php echo __('Edit'); ?></a> | </span>
 						<span class="edit"><a class="form-control ajax-trigger" href="#entres"
-						data-load-element="#form_row_<?php echo $form_id; ?>"
+						data-load-element="<?php echo esc_attr( '#form_row_' . trim( $form_id ) ); ?>"
 						data-action="toggle_form_state"
                         data-nonce="<?php echo esc_attr( wp_create_nonce( 'toggle_form_state') ); ?>"
-						data-active-element="#form_row_<?php echo $form_id; ?>"
+						data-active-element="<?php echo esc_attr( '#form_row_' . trim( $form_id ) ); ?>"
 						data-callback="set_form_state"
-						data-form="<?php echo $form_id; ?>"
+						data-form="<?php echo esc_attr( trim( $form_id ) ); ?>"
 
-						><?php if( !empty( $form['form_draft'] ) ) { echo __('Activate', 'caldera-forms'); }else{ echo __('Deactivate', 'caldera-forms'); } ?></a> | </span><?php } ?>
+						><?php if( !empty( $form['form_draft'] ) ) { echo __('Enable', 'caldera-forms'); }else{ echo __('Disable', 'caldera-forms'); } ?></a> | </span><?php } ?>
 
-						<?php if(!empty($form['db_support'])){ ?><span class="edit">
-							<a class="form-control form-entry-trigger ajax-trigger cf-entry-viewer-link" href="#entres"
-						            data-nonce="<?php echo wp_create_nonce( 'view_entries' ); ?>"
-									data-action="browse_entries"
-									data-target="#form-entries-viewer"
-									data-form="<?php echo $form_id; ?>"
-									data-template="#forms-list-alt-tmpl"
-									data-active-element="#form_row_<?php echo $form_id; ?>"
-									data-load-class="spinner"
-									data-active-class="highlight"
-									data-group="entry_nav"
-									data-callback="setup_pagination"
-									data-status="active"
-									data-page="1"
-						><?php esc_html_e( 'Entries', 'caldera-forms'); ?></a> | </span><?php } ?>
+						<?php if(!empty($form['db_support'])) { ?>
+							<span class="edit">
+								<?php if (  ! version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
+									echo '<span title="' . esc_attr( sprintf( __( 'Entry viewer is disabled due to your PHP version, see %s', 'caldera-forms' ), 'https://calderaforms.com/php?utm_source=wp-admin&utm_keyword=entry_viewer_php_version' ) ) .'" data-toggle="tooltip" data-placement="bottom" class="disabled">' . esc_html__( 'Entries', 'caldera-forms' ) . '</span> |';
+								} else { ?>
+									<a class="form-control form-entry-trigger ajax-trigger cf-entry-viewer-link"
+									   href="#entres"
+									   data-nonce="<?php echo wp_create_nonce( 'view_entries' ); ?>"
+									   data-action="browse_entries"
+									   data-target="#form-entries-viewer"
+									   data-form="<?php echo esc_attr( trim( $form_id ) ); ?>"
+									   data-template="#forms-list-alt-tmpl"
+									   data-active-element="<?php echo esc_attr( '#form_row_' . trim( $form_id ) ); ?>"
+									   data-load-class="spinner"
+									   data-active-class="highlight"
+									   data-group="entry_nav"
+									   data-callback="setup_pagination"
+									   data-status="active"
+									   data-page="1"
+									><?php esc_html_e( 'Entries', 'caldera-forms' ); ?></a> | </span><?php }
+						}?>
 						<input type="hidden" id="form-export-<?php echo $form_id; ?>" value='{ "formslug" : "<?php echo sanitize_title( $form['name'] ); ?>", "formid" : "<?php echo $form_id; ?>", "nonce" : "<?php echo wp_create_nonce( 'cf_del_frm' ); ?>" }'>
 						<?php if( empty( $form['_external_form'] ) ){ ?><span class="export"><a class="form-control ajax-trigger"
 							<?php
@@ -159,18 +225,35 @@ $modal_new_form = esc_html__('Create Form', 'caldera-forms').'|{"data-action" : 
 							data-modal="export"
 							data-modal-height="400"
 							data-modal-title="<?php echo esc_attr( __('Export Form', 'caldera-forms') ); ?>"
-							data-request="#form-export-<?php echo $form_id; ?>"
+							data-request="<?php echo esc_attr( '#form-export-' . trim( $form_id ) ); ?>"
 							data-type="json"
 							data-modal-buttons="<?php echo esc_attr( __( 'Export Form', 'caldera-forms' ) ); ?>|<?php echo esc_attr( json_encode( $buttons ) ); ?>"
 							data-template="#cf-export-template"
-							href="#export"><?php echo __('Export', 'caldera-forms'); ?></a> | </span><?php } ?>
-						<span><a class="ajax-trigger" href="#clone" data-request="start_new_form" data-modal-buttons='<?php echo $modal_new_form; ?>' data-clone="<?php echo $form_id; ?>" data-modal-width="600" data-modal-height="160" data-load-class="none" data-modal="new_clone" data-nonce="<?php echo esc_attr( wp_create_nonce( 'cf_create_form' ) ); ?>" data-modal-title="<?php echo __('Clone Form', 'caldera-forms'); ?>" data-template="#new-form-tmpl"><?php echo __('Clone', 'caldera-forms'); ?></a><?php if( empty( $form['_external_form'] ) ){ ?> | </span>
-						<span class="trash form-delete"><a class="form-control" data-confirm="<?php echo __('This will delete this form permanently. Continue?', 'caldera-forms'); ?>" href="admin.php?page=caldera-forms&delete=<?php echo $form_id; ?>&cal_del=<?php echo wp_create_nonce( 'cf_del_frm' ); ?>"><?php echo __('Delete'); ?></a></span><?php } ?>
+							href="#export"><?php esc_html_e('Export', 'caldera-forms'); ?></a> | </span><?php } ?>
+						<span>
+                            <a
+                                class="ajax-trigger clone-form-<?php esc_attr_e( $form_id ); ?>"
+                                href="#clone"
+                                data-request="start_new_form"
+                                data-modal-buttons='<?php echo  $modal_new_form ; ?>'
+                                data-clone="<?php esc_attr_e( $form_id ); ?>"
+                                data-modal-width="600"
+                                data-modal-height="160"
+                                data-load-class="none"
+                                data-modal="new_clone"
+                                data-nonce="<?php esc_attr_e( wp_create_nonce( 'cf_create_form' ) ); ?>"
+                                data-modal-title="<?php esc_attr_e('Clone Form', 'caldera-forms'); ?>"
+                                data-template="#new-form-tmpl"
+                            >
+                                <?php echo esc_html__('Clone', 'caldera-forms'); ?>
+                            </a>
+                            <?php if( empty( $form['_external_form'] ) ){ ?> | </span>
+						<span class="trash form-delete"><a class="form-control" data-confirm="<?php echo __('This will delete this form permanently. Continue?', 'caldera-forms'); ?>" href="admin.php?page=caldera-forms&delete=<?php echo trim( $form_id ); ?>&cal_del=<?php echo wp_create_nonce( 'cf_del_frm' ); ?>"><?php echo __('Delete'); ?></a></span><?php } ?>
 
 
 						</div>
 					</td>
-					<td style="width:4em; text-align:center;" class="entry_count_<?php echo $form_id; ?>"><?php echo $total; ?></td>
+					<td style="width:4em; text-align:center;" class="<?php echo esc_attr( 'entry_count_' . trim( $form_id ) ); ?><?php echo $form_id; ?>"><?php echo $total; ?></td>
 				</tr>
 
 
@@ -191,52 +274,52 @@ $modal_new_form = esc_html__('Create Form', 'caldera-forms').'|{"data-action" : 
 			</p>
 
 		</div>
-		<?php
-			// check db and only show the upgrade if db version is not there since its confusing
-			$db_version = get_option( 'CF_DB', 0 );
-			if( CF_DB > $db_version ) {
-			?>
-			<div id="cf-upgrade-maybe-fail">
+		<div class="caldera-forms-clippy-zone-inner-wrap">
+			<div class="caldera-forms-clippy">
+				<h2>
+					<?php esc_html_e( 'New To Caldera Forms?', 'caldera-forms' ); ?>
+				</h2>
 				<p>
-					<?php
-					echo __( sprintf( 'If you recently updated Caldera Forms and can no longer see saved forms, %s',
-						sprintf( '<a href="https://calderaforms.com/doc/caldera-forms-form-config-changes/" target="_blank"><strong>%s</strong></a>.', esc_html__( 'no data is lost. Click here for more information', 'caldera-forms' ),  'caldera-forms' ) ) ); ?>
+					<?php esc_html_e( 'We have a complete getting started guide for new users.', 'caldera-forms' ); ?>
 				</p>
-				<p>
-					<?php printf( '<a href="%s" class="button">%s</a>', esc_url( add_query_arg( array( 'page' => 'caldera-forms', 'cal_db_update' => wp_create_nonce() ) ) ), esc_html__( 'Run The Updater', 'caldera-forms' ) ); ?>
-				</p>
+
+				<a href="https://calderaforms.com/getting-started?utm-source=wp-admin&utm_campaign=clippy&utm_term=no-forms" target="_blank" class="bt-btn btn btn-orange">
+					<?php esc_html_e( 'Read Now', 'caldera-forms' ); ?>
+				</a>
 			</div>
-			<?php } ?>
+		</div>
+
 		<?php } ?>
 	</div>
 	</div>
 	<div id="caldera-forms-admin-page-right">
+        <?php if ( 1===7 && ! is_ssl() ): ?>
+            <div class="caldera-forms-clippy-zone warn-clippy">
+                <div class="caldera-forms-clippy-zone-inner-wrap" style="background: white">
+                    <div class="caldera-forms-clippy"
+                         style="background-color:white;border-left: 4px solid #dc3232;">
+                        <h2>
+                            <?php esc_html_e( 'Your Forms Might Be Marked Insecure', 'caldera-forms' ); ?>
+                        </h2>
+                        <p>
+                            <?php esc_html_e( 'WordPress reports that you are not using SSL. Your forms may be marked insecure by browsers if not loaded using HTTPS.', 'caldera-forms' ); ?>
+                        </p>
+                        <a href="https://calderaforms.com/docs/ssl?utm-source=wp-admin&utm_campaign=clippy&utm_term=support"
+                           target="_blank" class="bt-btn btn btn-green" style="width: 80%;margin-left:5%;">
+                            <?php esc_html_e( 'Learn More', 'caldera-forms' ); ?>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        <?php endif ?>
+
+        <?php //id is "clippy for historical reason
+        ///do not change without accounting for other JS and CSS that assumes this id ?>
 		<div id="caldera-forms-clippy">
-			<div class="caldera-forms-clippy-zone" id="caldera-forms-clippy-p1" style="background-image: url( '<?php echo esc_url( CFCORE_URL . '/assets/images/caldera-globe-logo-sm.png' ); ?>' );">
-			</div>
-			<div class="caldera-forms-clippy-zone" id="caldera-forms-clippy-p2" style="background-image: url( '<?php echo esc_url( CFCORE_URL . '/assets/images/caldera-globe-logo-sm.png' ); ?>' );" >
-			</div>
-			<div class="caldera-forms-clippy-zone" id="caldera-forms-clippy-p3" style="background-image: url( '<?php echo esc_url( CFCORE_URL . '/assets/images/caldera-globe-logo-sm.png' ); ?>' );">
-			</div>
-		</div>
-		<div class="form-entries-wrap" aria-live="polite" aria-relevant="additions removals">
-	<?php include CFCORE_PATH . 'ui/entries_toolbar.php'; ?>
-	<div id="form-entries-viewer"></div>
 
-		<div class="tablenav caldera-table-nav" style="display:none;">
-
-			<div class="tablenav-pages">
-				<input title="<?php echo esc_attr( esc_html__( 'Entries per page', 'caldera-forms' ) ); ?>" id="cf-entries-list-items" type="number" value="<?php echo $entry_perpage; ?>" class="screen-per-page">
-				<span class="pagination-links">
-					<a href="#first" title="Go to the first page" data-page="first" class="first-page">«</a>
-					<a href="#prev" title="Go to the previous page" data-page="prev" class="prev-page">‹</a>
-					<span class="paging-input"><input type="text" size="1" name="paged" title="Current page" class="current-page"> of <span class="total-pages"></span></span>
-					<a href="#next" title="Go to the next page" data-page="next" class="next-page">›</a>
-					<a href="#last" title="Go to the last page" data-page="last" class="last-page">»</a>
-				</span>
-			</div>
 		</div>
-	</div>
+		<?php echo Caldera_Forms_Entry_Viewer::full_viewer(); ?>
+
 	</div>
 </div>
 
@@ -257,7 +340,7 @@ function set_form_state( obj ){
 
 function new_form_redirect(obj){
 	if(typeof obj.data === 'string'){
-		window.location = 'admin.php?page=caldera-forms&edit=' + obj.data;
+		window.location = '<?php echo esc_url(add_query_arg( ['page' => 'caldera-forms' ], admin_url( 'admin.php' ) ) ); ?>&edit=' + obj.data.trim();
 	}else{
 		alert(obj.data.error);
 	}
@@ -324,30 +407,10 @@ jQuery( function( $ ){
 	cf_build_export = function( el ){
 		var export_object = $('#export_baldrickModal').serialize();
 		window.location = "<?php echo esc_attr( admin_url('admin.php?page=caldera-forms' ) ); ?>&" + export_object;
-	}
+	};
 
-	var notices = $('.error,.notice,.notice-error');
-
-	if( notices.length ){
-		$('.cf-notice-info-line').html( notices.first().text() );
-		$('.cf-notification-panel').hide();
-		$('.cf-notification').fadeIn();
-		notices.appendTo( $('.cf-notification-panel') );
-		$( '.cf-notice-toggle').click( function(){
-			$( '.cf-notice-toggle').toggle();
-			$('.cf-notification-panel').slideToggle();
-		});
-	}
-	var ready_limit_change;
-	$(document).on('change', '#cf-entries-list-items', function(){
-		if( ready_limit_change ){
-			clearTimeout( ready_limit_change );
-		}
-		ready_limit_change = setTimeout( function(){
-			$('.status_toggles.button-primary').trigger('click');
-		}, 280 );
-
-	});
+	var $notices = $('.error,.notice,.notice-error');
+	$notices.remove();
 
 	$( document ).on('submit', '#new_form_baldrickModal', function(e){
 		e.preventDefault();
@@ -422,10 +485,11 @@ jQuery( function( $ ){
 	var inEmailSettings = false;
 	$( '#cf-email-settings' ).on( 'click', function(e){
 		e.preventDefault();
-		var $mainUI = $( '.form-panel-wrap, .form-entries-wrap' );
-		var $emailSettingsUI = $( '#cf-email-settings-ui' );
-		var $otherButtons = $( '.caldera-forms-toolbar-item a' );
-		var $toggles = $( '.toggle_option_preview, #render-with-label' );
+		var $mainUI = $( '.form-panel-wrap, .form-entries-wrap' ),
+			$emailSettingsUI = $('#cf-email-settings-ui'),
+			$otherButtons = $('.caldera-forms-toolbar-item a'),
+			$toggles = $('.toggle_option_preview, #render-with-label'),
+			$clippy = $('#caldera-forms-clippy');
 
 		if( inEmailSettings ){
 			$( this ).html( '<?php esc_html_e( 'Email Settings', 'caldera-forms' ); ?>' );
@@ -434,6 +498,7 @@ jQuery( function( $ ){
 			$emailSettingsUI.hide().attr( 'aria-hidden', 'true' ).css( 'visibility', 'hidden' );
 			$mainUI.show().attr( 'aria-hidden', 'false' ).css( 'visibility', 'visible' );
 			$toggles.show().attr( 'aria-hidden', 'false' ).css( 'visibility', 'visible' );
+			$clippy.show().attr( 'aria-hidden', 'false' ).css( 'visibility', 'visible' );
 		}else{
 			inEmailSettings = true;
 			$( this ).html( '<?php esc_html_e( 'Close Email Settings', 'caldera-forms' ); ?>' );
@@ -441,9 +506,8 @@ jQuery( function( $ ){
 			$mainUI.hide().attr( 'aria-hidden', 'true' ).css( 'visibility', 'hidden' );
 			$emailSettingsUI.show().attr( 'aria-hidden', 'false' ).css( 'visibility', 'visible' );
 			$( this ).html = "<?php esc_html__( 'Email Settings', 'caldera-forms' ); ?>";
-
+			$clippy.hide().attr( 'aria-hidden', 'true' ).css( 'visibility', 'hidden' );
 			$toggles.hide().attr( 'aria-hidden', 'true' ).css( 'visibility', 'hidden' );
-			$( this ).on( 'click' )
 		}
 
 
@@ -492,12 +556,41 @@ jQuery( function( $ ){
 		name.show();
 	})
 
+	$(document).ready(function() {
+		var emailSettingsNotificationNudgeTimeout = setTimeout(function(){
+			$('#cf-email-settings').addClass('cf-email-settings-notification-nudge');
+		}, 3000);
+		$('#cf-email-settings').on('click', function() {
+			clearTimeout(emailSettingsNotificationNudgeTimeout);
+			$('#cf-email-settings').removeClass('cf-email-settings-notification-nudge');
+		});
+	});
+
 });
 </script>
+
+<style>
+.cf-email-settings-notification-nudge {
+	position: relative;
+}
+.cf-email-settings-notification-nudge::after {
+	content: " ";
+	background-color: #ca4a1f;
+	width: 10px;
+	height: 10px;
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	border-radius: 50%;
+}
+</style>
+
 <?php
 
-include CFCORE_PATH . 'ui/entry_navigation.php';
-
-
+/**
+ * Runs at the bottom of the main Caldera Forms admin page
+ *
+ * @since unknown
+ */
 do_action('caldera_forms_admin_footer');
 ?>

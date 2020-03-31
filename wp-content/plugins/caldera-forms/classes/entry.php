@@ -66,6 +66,24 @@ class Caldera_Forms_Entry {
 	 */
 	protected $found;
 
+	/**
+	 * Holds the map of field_id to index of $this->fields. Lazy loaded by $this->get_field_map()
+	 *
+	 * @since 1.5.0.7
+	 *
+	 * @var array
+	 */
+	private $field_map;
+
+    /**
+     * WPDB instance
+     *
+     * @since 1.5.8
+     *
+     * @var WPDB|false
+     */
+	private  $wpdb;
+
 
 	/**
 	 * Caldera_Forms_Entry constructor.
@@ -95,15 +113,31 @@ class Caldera_Forms_Entry {
 	}
 
 	/**
-	 * Get entry object
+	 * Set entry object (seriously it's not a getter, it's a setter, don't use.)
 	 *
 	 * @since 1.4.0
+     * @deprecated 1.5.8
 	 *
 	 * @param \Caldera_Forms_Entry_Entry $entry
 	 */
 	public function get_entry_object( Caldera_Forms_Entry_Entry $entry ){
-		$this->entry = $entry;
+	    _deprecated_function( __FUNCTION__, '1.5.8', 'Caldera_Forms_Entry::set_entry_object' );
+		$this->set_entry_object( $entry );
 	}
+
+    /**
+     * Set entry object
+     *
+     * @since 1.5.8
+     *
+     * @param \Caldera_Forms_Entry_Entry $entry
+     *
+     * @return $this
+     */
+    public function set_entry_object( Caldera_Forms_Entry_Entry $entry ){
+        $this->entry = $entry;
+        return $this;
+    }
 
 	/**
 	 * Get form ID
@@ -113,7 +147,7 @@ class Caldera_Forms_Entry {
 	 * @return mixed
 	 */
 	public function get_form_id(){
-		return $this->form[ 'id' ];
+		return $this->form[ 'ID' ];
 	}
 
 	/**
@@ -126,6 +160,12 @@ class Caldera_Forms_Entry {
 	 * @return \Caldera_Forms_Entry_Entry
 	 */
 	public function get_entry(){
+	    if( ! $this->entry ){
+	        $this->query();
+        }
+        if( ! $this->entry ){
+	        $this->entry = new Caldera_Forms_Entry_Entry;
+        }
 		return $this->entry;
 	}
 
@@ -175,15 +215,18 @@ class Caldera_Forms_Entry {
 		
 	}
 
+
 	/**
-	 * @param $id
+	 * Get a specific field
 	 *
-	 * @return Caldera_Forms_Entry_Field
+	 * @since 1.4.0
+	 *
+	 * @param string $id Field ID
+	 *
+	 * @return Caldera_Forms_Entry_Field|null
 	 */
 	public function get_field( $id ){
-		if( isset( $this->fields[ $id ] ) ){
-			return $this->fields[ $id ];
-		}
+		return $this->find_field_by_id( $id );
 	}
 
 	/**
@@ -196,6 +239,17 @@ class Caldera_Forms_Entry {
 	public function get_meta(){
 		return $this->meta;
 	}
+
+    /**
+     * Get form config
+     *
+     * @since 1.5.8
+     *
+     * @return array
+     */
+	public function get_form(){
+        return $this->form;
+    }
 
 
 	/**
@@ -220,17 +274,19 @@ class Caldera_Forms_Entry {
 	 * @since 1.4.0
 	 */
 	protected function find_entry(){
-		global $wpdb;
-		$table = $wpdb->prefix . 'cf_form_entries';
-		$sql = $wpdb->prepare( "SELECT * FROM $table WHERE `id` = %d AND `form_id` = %s", $this->entry_id, $this->form[ 'ID' ]  );
-		$results = $wpdb->get_results( $sql );
-		if ( ! empty( $results ) ) {
-			$this->found = true;
-			$this->entry = new Caldera_Forms_Entry_Entry();
-			$this->entry->set_form_object( $results[ 0 ] );
-		}else{
-			$this->found = false;
-		}
+		$wpdb = $this->get_wpdb();
+        if ( $wpdb ) {
+            $table = $wpdb->prefix . 'cf_form_entries';
+            $sql = $wpdb->prepare("SELECT * FROM $table WHERE `id` = %d AND `form_id` = %s", $this->entry_id, $this->form['ID']);
+            $results = $wpdb->get_results($sql);
+            if (!empty($results)) {
+                $this->found = true;
+                $this->entry = new Caldera_Forms_Entry_Entry();
+                $this->entry->set_form_object($results[0]);
+            } else {
+                $this->found = false;
+            }
+        }
 
 	}
 
@@ -240,16 +296,18 @@ class Caldera_Forms_Entry {
 	 * @since 1.4.0
 	 */
 	protected function find_fields(){
-		global $wpdb;
-		$table = $wpdb->prefix . 'cf_form_entry_values';
-		$sql = $wpdb->prepare( "SELECT * FROM $table WHERE `entry_id` = %d",  $this->entry_id  );
-		$results = $wpdb->get_results( $sql );
-		if( ! empty( $results ) ){
-			foreach( $results as $result ){
-				$_field = new Caldera_Forms_Entry_Field(  $result );
-				$this->fields[] = $_field;
-			}
-		}
+		$wpdb = $this->get_wpdb();
+        if ( $wpdb ) {
+            $table = $wpdb->prefix . 'cf_form_entry_values';
+            $sql = $wpdb->prepare("SELECT * FROM $table WHERE `entry_id` = %d", $this->entry_id);
+            $results = $wpdb->get_results($sql);
+            if (!empty($results)) {
+                foreach ($results as $result) {
+                    $_field = new Caldera_Forms_Entry_Field($result);
+                    $this->fields[] = $_field;
+                }
+            }
+        }
 	}
 
 	/**
@@ -258,17 +316,19 @@ class Caldera_Forms_Entry {
 	 * @since 1.4.0
 	 */
 	protected function find_metas(){
-		global $wpdb;
-		$table = $wpdb->prefix . 'cf_form_entry_meta';
-		$sql = $wpdb->prepare( "SELECT * FROM $table WHERE `entry_id` = %d", $this->entry_id  );
-		$results = $wpdb->get_results( $sql );
-		if( ! empty( $results ) ){
-			foreach ( $results as $result ){
-				$_meta = new Caldera_Forms_Entry_Meta();
-				$_meta = $_meta->set_form_object( $result );
-				$this->meta[] = $_meta;
-			}
-		}
+		$wpdb = $this->get_wpdb();
+        if ( $wpdb ) {
+            $table = $wpdb->prefix . 'cf_form_entry_meta';
+            $sql = $wpdb->prepare("SELECT * FROM $table WHERE `entry_id` = %d", $this->entry_id);
+            $results = $wpdb->get_results($sql);
+            if (!empty($results)) {
+                foreach ($results as $result) {
+                    $_meta = new Caldera_Forms_Entry_Meta();
+                    $_meta = $_meta->set_form_object($result);
+                    $this->meta[] = $_meta;
+                }
+            }
+        }
 	}
 
 	/**
@@ -283,7 +343,9 @@ class Caldera_Forms_Entry {
 		if( is_numeric( $this->entry_id   ) ){
 			if ( ! empty( $this->fields ) ) {
 				foreach ( $this->fields as $i =>  $field ) {
-					$this->fields[ $i ] = $this->save_field( $field );
+					if ( $field instanceof  Caldera_Forms_Entry_Field ) {
+						$this->fields[ $i ] = $this->save_field( $field );
+					}
 
 				}
 				
@@ -291,7 +353,9 @@ class Caldera_Forms_Entry {
 
 			if ( ! empty( $this->meta ) ) {
 				foreach ( $this->meta as $i => $meta ) {
-					$this->meta[ $i ] = $this->save_meta( $meta );
+					if ( $meta instanceof Caldera_Forms_Entry_Meta ) {
+						$this->meta[ $i ] = $this->save_meta( $meta );
+					}
 				}
 
 			}
@@ -314,8 +378,10 @@ class Caldera_Forms_Entry {
 			return false;
 		}
 
-		global $wpdb;
-		$wpdb->update( $wpdb->prefix . 'cf_form_entries', array('status' => $status ), array( 'id' => $this->entry_id ) );
+		$wpdb = $this->get_wpdb();
+        if ( $wpdb ) {
+            $wpdb->update($wpdb->prefix . 'cf_form_entries', array('status' => $status), array('id' => $this->entry_id));
+        }
 	}
 
 	/**
@@ -328,7 +394,13 @@ class Caldera_Forms_Entry {
 	public function add_field( Caldera_Forms_Entry_Field $field ){
 
 		$field->entry_id = $this->entry_id;
-		$this->fields[] = $field;
+		$key = $this->find_field_index( $field->field_id );
+		if( ! is_null( $key ) ){
+			$this->fields[ $key ] = $field;
+		}else{
+			$this->fields[] = $field;
+		}
+
 
 	}
 
@@ -349,13 +421,21 @@ class Caldera_Forms_Entry {
 	 * @since 1.4.0
 	 */
 	protected function save_entry() {
-		global $wpdb;
+		$wpdb = $this->get_wpdb();
 		if( null == $this->entry ) {
 			//@todo some error or exception or something
 			return;
 		}
-		$wpdb->insert( $wpdb->prefix . 'cf_form_entries', $this->entry->to_array() );
-		$this->entry_id = $this->entry->id = $wpdb->insert_id;
+        if ( $wpdb ) {
+            if (!$this->entry_id) {
+                $wpdb->insert($wpdb->prefix . 'cf_form_entries', $this->entry->to_array());
+                $this->entry_id = $this->entry->id = $wpdb->insert_id;
+            } else {
+                $wpdb->update($wpdb->prefix . 'cf_form_entries', $this->entry->to_array(), array(
+                    'id' => $this->entry_id
+                ));
+            }
+        }
 	}
 
 	/**
@@ -364,14 +444,22 @@ class Caldera_Forms_Entry {
 	 * @since 1.4.0
 	 *
 	 * @param \Caldera_Forms_Entry_Field $field
+	 *
+	 * @return  Caldera_Forms_Entry_Field
 	 */
 	protected function save_field( Caldera_Forms_Entry_Field $field ){
 		$field->entry_id = $this->entry_id;
-		global $wpdb;
-		$data = $field->to_array();
-		unset( $data[ 'id' ] );
-		$wpdb->insert( $wpdb->prefix . 'cf_form_entry_values', $data  );
-		$field->id = $wpdb->insert_id;
+		$wpdb = $this->get_wpdb();
+		if( $wpdb ) {
+            $data = $field->to_array();
+            if (!isset($data['id'])) {
+                $field->id = $field->save();
+            } else {
+                Caldera_Forms_Entry_Update::update_field($field);
+            }
+
+        }
+
 		return $field;
 	}
 
@@ -381,15 +469,20 @@ class Caldera_Forms_Entry {
 	 * @since 1.4.0
 	 *
 	 * @param \Caldera_Forms_Entry_Meta $meta
+	 *
+	 * @return Caldera_Forms_Entry_Meta
 	 */
 	protected function save_meta( Caldera_Forms_Entry_Meta $meta ){
 		$meta->entry_id = $this->entry_id;
-		global $wpdb;
-		$data = $meta->to_array();
-		unset( $data[ 'id' ] );
-		$wpdb->insert( $wpdb->prefix . 'cf_form_entry_meta',  $data );
-		$meta->meta_id = $wpdb->insert_id;
-		return $meta;
+		$wpdb = $this->get_wpdb();
+        if( $wpdb ) {
+            $data = $meta->to_array();
+            unset( $data[ 'id' ] );
+            $wpdb->insert( $wpdb->prefix . 'cf_form_entry_meta',  $data );
+            $meta->meta_id = $wpdb->insert_id;
+            return $meta;
+        }
+
 	}
 
 	/**
@@ -413,6 +506,86 @@ class Caldera_Forms_Entry {
 		return true;
 	}
 
+	/**
+	 * Find field object by field ID
+	 *
+	 * @since 1.5.0.7
+	 *
+	 * @param $field_id
+	 *
+	 * @return Caldera_Forms_Entry_Field|null
+	 */
+	protected function find_field_by_id( $field_id ){
+		$key = $this->find_field_index( $field_id );
+		if( ! is_null( $key ) ){
+			return $this->fields[ $key ];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Lazy-loader for "field map" that provides field_id => index of $this->field
+	 *
+	 * @since 1.5.0.7
+	 *
+	 * @return array
+	 */
+	protected function get_field_map(){
+        $this->get_fields();
+        if(
+            empty( $this->field_map ) && ! empty( $this->fields )
+            || ! empty( $this->fields ) && count( $this->fields ) !== count( $this->field_map )
+
+        ){
+            /** @var Caldera_Forms_Entry_Field $field */
+            foreach ( $this->fields as $index => $field ){
+                if ( ! isset( $this->field_map[ $field->field_id ] ) ) {
+                    $this->field_map[$field->field_id] = $index;
+                }
+            }
+        }
+
+        return $this->field_map;
+
+	}
+
+    /**
+     * Find field by field ID
+     *
+     * @since unknown
+     *
+     * @param $field_id
+     * @return mixed|null
+     */
+	private function find_field_index( $field_id ){
+		$this->get_field_map();
+		if( ! empty( $this->field_map ) && isset( $this->field_map[ $field_id ] ) ){
+			return $this->field_map[ $field_id ];
+		}
+
+		return null;
+	}
+
+    /**
+     * Get the WPDB instance
+     *
+     * @since 1.5.8
+     *
+     * @return WPDB|false
+     */
+	protected function get_wpdb(){
+        if( false !== $this->wpdb && ! is_object( $this->wpdb ) ){
+            global $wpdb;
+            if ( is_object( $wpdb )) {
+                $this->wpdb = $wpdb;
+            } else {
+                $this->wpdb = false;
+            }
+        }
+
+        return $this->wpdb;
+    }
 }
 
 

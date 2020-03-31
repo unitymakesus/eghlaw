@@ -2,9 +2,9 @@
 Contributors: nathanrice, studiopress, wpmuguru
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5553118
 Tags: shortcodes, genesis, genesiswp, studiopress
-Requires at least: 3.2
-Tested up to: 4.3.1
-Stable tag: 2.1.4
+Requires at least: 5.0.0
+Tested up to: 5.2.2
+Stable tag: 2.3.0
 
 This plugin lets you edit the three most commonly modified areas in any Genesis theme: the post-info (byline), the post-meta, and the footer area.
 
@@ -25,38 +25,46 @@ This plugin creates a new Genesis settings page that allows you to modify the po
 
 = What are Shortcodes? =
 
-Check out the [Shortcodes API](http://codex.wordpress.org/Shortcode_API) for an explanation, and our [Shortcode Reference](http://dev.studiopress.com/shortcode-reference) for a list of available Genesis-specific shortcodes.
-
-= My PHP isn't working =
-
-This plugin is not designed to work with PHP code.
+Check out the [Shortcodes API](http://codex.wordpress.org/Shortcode_API) for an explanation, and our [Shortcode Reference](https://studiopress.github.io/genesis/basics/genesis-shortcodes/#footer-shortcodes) for a list of available Genesis-specific shortcodes.
 
 = The plugin won't activate =
 
-You must have Genesis (1.3+) or a Genesis child theme installed and activated on your site.
+You must have Genesis (3.1.0+) and a Genesis child theme installed and activated on your site.
 
 == Changelog ==
 
-= 2.1.4 =
-* Fix typo warning in textdomain loader
+= 2.3.0 =
+* Remove footer credits setting, replaced by core Genesis 3.1 setting.
+* Increase minimum Genesis version to 3.1.0.
+* Increase minimum WordPress version to 5.0.0.
+
+= 2.2.2 =
+* Add compatibility with WordPress Coding Standards.
+
+= 2.2.1 =
+* Genesis 2.6+ compatibility (prevents white screen).
+
+= 2.2.0 =
+* Rewrite based in plugin boilerplate.
+* Update Author and Author URI.
 
 = 2.1.3 =
-* add textdomain loader
-* add plugin header i18n
+* add textdomain loader.
+* add plugin header i18n.
 
 = 2.1.2 =
-* Generate POT
+* Generate POT.
 
 = 2.1.1 =
-* Prevent fatal error when Genesis 2.1 not active
+* Prevent fatal error when Genesis 2.1 not active.
 
 = 2.1.0 =
-* Genesis 2.1+ compatibility
+* Genesis 2.1+ compatibility.
 
 = 1.7.1 =
-* Increased installation requirement to Genesis 1.7.1
-* Removed PHP4 constructor
-* Whitespace, standards, and documentation
+* Increased installation requirement to Genesis 1.7.1.
+* Removed PHP4 constructor.
+* Whitespace, standards, and documentation.
 
 = 1.0 =
-* Initial Release
+* Initial Release.
