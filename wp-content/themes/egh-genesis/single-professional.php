@@ -207,7 +207,7 @@ function egh_pro_legal_services() {
         echo '<h3>Professional Affiliations</h3>';
         echo '<ul>' . $pro_affiliations . '</ul>';
       endif;
-
+      
       if( $appointments ):
         $appointments = preg_replace("/^--(.*)/m", "<li>$1</li>", $appointments);  // Make 3rd level bullets
         $appointments = preg_replace("/(<li>.*?<\/li>(?!\n<li>))/s", "<ul>$1</ul>", $appointments); // Wrap 3rd level bullets
@@ -221,7 +221,7 @@ function egh_pro_legal_services() {
       endif;
 
 
-    if($pro_licenses ):
+      if( $pro_licenses ):
         $pro_licenses = preg_replace("/(.*)/i", "<li>$1</li>", $pro_licenses);
         $pro_licenses = str_replace("<li></li>", "", $pro_licenses);
 

@@ -16,6 +16,14 @@
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
+/* HOTFIXES */
+.practice-professionals .attorney-list li {
+  width: 25%;
+}
+
+.pro-badges > div, .pro-badges > img, .pro-badges > span, .pro-badges > p {
+  vertical-align: middle;
+}
 
 /* # Table of Contents
 - HTML5 Reset
@@ -939,6 +947,7 @@ img.alignright,
 .featured-content .entry {
 	background: none;
 	padding: 0;
+	margin-bottom: 1em !important;
 }
 
 .featured-content .entry:last-of-type {
@@ -1796,7 +1805,7 @@ p.entry-meta {
 
 /* # Print Styles
 ---------------------------------------------------------------------------------------------------- */
-
+/*
 @media print {
 
 	*,
@@ -1936,4 +1945,4 @@ p.entry-meta {
 		page-break-before: avoid;
 	}
 
-}
+}*/
