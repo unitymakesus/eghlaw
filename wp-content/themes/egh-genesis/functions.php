@@ -208,7 +208,7 @@ function egh_read_more_link($content) {
 //* Add allowed file types
 add_filter('upload_mimes', 'my_mime_types');
 function my_mime_types($mime_types) {
-    $mime_types['vcf'] = 'text/x-vcard'; //VCard
+    $mime_types['vcf'] = 'text/vcard'; //VCard
     return $mime_types;
 }
 
